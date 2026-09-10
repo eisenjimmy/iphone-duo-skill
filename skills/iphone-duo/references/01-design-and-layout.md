@@ -4,7 +4,7 @@ Use this reference for general iPhone Duo design, responsive SwiftUI/UIKit archi
 
 ## Design model
 
-Treat iPhone Duo as **iPhone with a wider range of available spaces and poses**, not as a separate platform. The same app may appear on the outer display, the inner display, beside another app, in a partially folded posture, or in an intermediate resizable region.
+Treat iPhone Duo as **iPhone with a wider range of available spaces and poses**, not as a separate platform. The same app may appear on the outer display, the inner display, beside another app, in a partially open pose, or in an intermediate resizable region.
 
 The design hierarchy is:
 
@@ -25,7 +25,7 @@ Prefer environment/trait information that describes **usable space**:
 @Environment(\.verticalSizeClass) private var verticalSizeClass
 ```
 
-Do not make ordinary layout decisions from interface orientation. Apple's Duo guidance states that the inner display is regular in both dimensions and doesn't follow traditional supported-orientation assumptions in the same way as ordinary iPhone layouts.
+Do not make ordinary layout decisions from interface orientation. The HIG states the outer display is **compact width** and the inner display is **regular width**. Tech Talk 111461 goes further: the inner display is **regular in both dimensions** and **does not honor supported interface orientations**. Attribute accordingly — the vertical-dimension and orientation claims come from the talk, not the HIG.
 
 Use size classes for broad information-architecture changes, and local container geometry for component-level decisions.
 
@@ -106,6 +106,25 @@ This handles compact, intermediate, split-view, and expansive widths more gracef
 
 If fold-aware spacing is required, retain the adaptive grid but use reserved-region information to alter local spacing or grouping rather than replacing the entire grid.
 
+### Even columns across the fold
+
+The HIG is explicit: **"In a grid-style layout, prefer an even number of columns so content
+divides cleanly."** An odd column count puts a column *on* the folding region.
+
+`.adaptive(minimum:)` is the right default at narrow and intermediate widths, but it yields
+whatever count fits — odd counts included — which is exactly wrong on the inner display, the
+case this skill exists for. Size the minimum so the natural count lands even at Duo widths,
+or pin an explicit even count once you are in expansive presentation:
+
+```swift
+GridItem(.adaptive(minimum: 220), spacing: 16)                        // narrow → intermediate
+Array(repeating: GridItem(.flexible(), spacing: 16), count: 4)        // expansive: keep it even
+```
+
+Query `reservedRegions(kind: .division, options: .includeInactive)` if you need to know the
+fold is there while the device is flat — the region has zero width when open, but its
+existence is the reason the count matters.
+
 ## `ViewThatFits`
 
 Use `ViewThatFits` when multiple semantically equivalent arrangements are acceptable:
@@ -163,7 +182,7 @@ instead of manually subtracting `left * 2` or `top * 2`.
 
 ## Full-width visual content
 
-Some immersive, non-scrolling interfaces can use the full physical width when doing so improves composition. Calculator-like layouts, media canvases, maps, games, and camera previews may be candidates.
+Full-bleed to the physical width only when the view holds no readable text and no tap target under 44pt — media canvases, maps, game boards, camera previews. The HIG adds one hard constraint: **nothing may conflict with the Dynamic Island or the status bar.** Mixing is fine — a background or header may span full width while scrollable content stays inset.
 
 A hybrid composition is often strongest:
 
@@ -252,6 +271,17 @@ if orientation == .landscape { ... }
 ```
 
 Prefer size class, aspect ratio, or local available space depending on what the design actually needs.
+
+## Games
+
+The HIG gives games their own best practice, and the skill would otherwise hand a
+Unity/SpriteKit/Metal team nothing:
+
+- You **may** lock to portrait or landscape — but **fill the screen in every pose**.
+- **Prefer changing the aspect ratio** over letterboxing or pillarboxing.
+- If padding is unavoidable, **fill it with artwork** so the experience still reads as
+  full screen.
+- Keep text and control sizes as consistent as you can while the device resizes.
 
 ## Acceptance criteria
 

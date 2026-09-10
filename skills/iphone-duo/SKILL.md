@@ -3,361 +3,271 @@ name: iphone-duo
 description: >-
   Designs, audits, and adapts SwiftUI and UIKit apps for Apple iPhone Duo and
   continuously resizing iPhone interfaces. Use for foldable iPhone support,
-  inner/outer display behavior, iOS 27.1 ReservedRegion, ArrangementView,
-  vertical toolbars and tab bars, hinge interactions, split-view multitasking,
-  multiple scenes, scene accessories, camera direction coordination, or when
-  removing UIScreen, UIDevice, orientation, fixed-width, or isDuo layout logic.
+  inner/outer display behavior, reserved regions, arrangement views, vertical
+  toolbars and tab bars, hinge interactions, Split View multitasking, multiple
+  scenes, scene accessories, camera direction coordination, or when removing
+  UIScreen, UIDevice, orientation, fixed-width, or isDuo layout logic.
 compatibility: >-
-  Intended for Codex, Claude Code, Cursor, and Agent Skills-compatible coding
-  agents. Some Duo APIs require the iOS 27.1 SDK; verify the active Xcode SDK.
+  Any Agent Skills-compatible coding agent (Claude Code, Codex, Cursor).
+  Duo-only APIs require the iOS 27.1 SDK; the skill degrades to Tier 1 work
+  when the active SDK is older.
 metadata:
   author: eisenjimmy
-  version: "1.0.0"
+  version: "2.1.0"
   research-date: "2026-09-10"
+  fact-source: "data/api-manifest.json"
 ---
 
 # iPhone Duo
 
-Build **one excellent adaptive iPhone experience**, not a parallel “Duo version.”
+> **Layout reacts to available space. Physical interaction may react to the hinge.**
+> Every rule below is a consequence of that one sentence.
 
-A correct Duo implementation reacts primarily to **available container space, safe areas, system navigation behavior, and reserved regions**. Use physical hinge state or multi-display APIs only when the feature itself depends on those physical capabilities.
+iPhone Duo has an inner display and an outer display, each with a front camera, joined
+by a hinge. It is still an iPhone. An app that genuinely resizes already works; an app
+that encodes screen assumptions breaks in ways users notice immediately.
 
-## Mandatory reading policy
+Build **one adaptive app**. There is real Duo-specific code — reserved regions,
+arrangements, hinge, scenes — but every sanctioned branch is gated on a *capability*
+(is there a hinge? is a region active? is the accessory available?), never on device
+identity.
 
-Read this file completely before changing code. Then load only the references needed for the task:
+## Load only what the task needs
 
-- General design, safe areas, sizing, grids: `references/01-design-and-layout.md`
-- Toolbars, tab bars, split navigation, overflow: `references/02-bars-and-navigation.md`
-- Fold avoidance, reserved regions, arrangements, hinge: `references/03-fold-arrangements-and-hinge.md`
-- Split-view multitasking, multiple scenes, scene accessories: `references/04-scenes-and-multidisplay.md`
-- Camera apps: `references/05-camera.md`
-- Repository audit, test matrix, acceptance criteria: `references/06-testing-and-review.md`
-- API patterns and transformation examples: `references/07-api-cookbook.md`
-- Apple source provenance and freshness: `references/08-sources.md`
+| File | Load when |
+|---|---|
+| `references/01-design-and-layout.md` | Sizing, size classes, grids, safe areas, state continuity |
+| `references/02-bars-and-navigation.md` | Toolbars, tab bars, vertical bars, overflow, split navigation |
+| `references/03-fold-arrangements.md` | Reserved regions, fold avoidance, `ArrangementView` |
+| `references/04-hardware-scenes-hinge.md` | Hinge input, Split View, multiple scenes, scene accessories |
+| `references/05-camera.md` | Any capture, preview, or camera-direction work |
+| `references/06-testing-and-review.md` | Audit method, test matrix, report templates |
+| `references/07-api-cookbook.md` | **The code index.** Every full call site and transformation |
+| `references/08-sources.md` | Apple provenance, freshness, source precedence |
 
-For an existing codebase, run `bash scripts/audit-duo.sh <project-root>` as a heuristic first pass, then validate every result manually.
-
----
-
-## Non-negotiable invariants
-
-1. **Never create a device-identity layout branch as the primary architecture.** Reject `if isDuo`, model-name checks, idiom checks, or outer/inner-display checks used merely to choose ordinary layout.
-2. **Layout reacts to available space; physical interaction may react to the hinge.** Do not use hinge angle to decide sidebar visibility, column count, navigation collapse, or routine responsive layout.
-3. **Preserve semantic view identity and app state across resizing.** Folding must not reset navigation path, selection, scroll state, draft text, playback, form data, or unsaved edits.
-4. **Prefer system containers.** `NavigationStack`, `NavigationSplitView`, `TabView`, `List`, `ScrollView`, sheets, alerts, menus, popovers, and standard toolbars gain fold-aware behavior automatically.
-5. **Respect each safe-area edge independently.** Duo layouts can be asymmetric.
-6. **Do not put critical content across a fold or occlusion region.** Backgrounds and continuous scrolling content may cross when interruption is acceptable.
-7. **Keep navigation outside `ArrangementView`.** An arrangement is a layout container, not a navigation architecture.
-8. **Do not place `ArrangementView` inside a `List` or `ScrollView` unless current Apple documentation explicitly changes this guidance.**
-9. **Prefer system bars to custom bars.** System navigation/toolbars can become vertical and manage overflow; hand-built bars usually cannot.
-10. **Do not manually target two physical displays as independent app canvases.** Use scenes and scene accessories according to system availability.
-11. **Duo-specific functionality is additive.** The app must remain fully functional when hinge data, a second display accessory, or another Duo-only capability is unavailable.
-12. **Do not invent dimensions, hinge coordinates, bar widths, or camera geometry.** Query the environment or use system APIs.
-13. **Verify the active SDK before emitting iOS 27.1 code.** If a symbol is unavailable, prepare an isolation boundary or conditional implementation instead of fabricating an API.
+`data/api-manifest.json` is the **only** authority on whether an API symbol is real.
+Its `status` field says `verified` (Apple doc page resolves), `apple-sourced` (verbatim
+from an Apple sample, no doc page yet), or `conflicted` (Apple's own materials disagree).
+**Never emit a symbol that is not in the manifest.**
 
 ---
 
-## Three implementation tiers
+## Invariants
 
-Classify every proposed change before editing code.
+Each rule states the violation that proves it.
 
-### Tier 1 — Universal adaptive foundation
+1. **No device-identity branch for ordinary layout.**
+   `if isDuo`, model checks, idiom checks, or inner/outer-display checks used to pick a
+   normal layout. Branch on space, not identity.
+2. **Hinge is interaction input, never a layout switch.** Apple is explicit. Layout
+   belongs to reserved regions and arrangements.
+   ✗ `if hinge.angle.degrees > 120 { showSidebar = true }`
+3. **State survives resizing.** Folding must not reset navigation path, selection,
+   scroll, focus, draft text, playback, filters, or unsaved edits. One state owner —
+   never a parallel `compactViewModel` / `expandedViewModel`.
+4. **Prefer system containers.** `NavigationStack`, `NavigationSplitView`, `TabView`,
+   `List`, sheets, alerts, menus, and container-provided toolbars get fold-aware
+   behavior free. Content in a hand-rolled `UIToolbar` is not considered at all.
+5. **Treat every safe-area edge independently.** Duo insets are routinely asymmetric.
+   ✗ `bounds.width - safeAreaInsets.left * 2`
+6. **Nothing critical crosses a fold or an occlusion.** The test is not "can pixels
+   cross?" but **"does interruption damage meaning or interaction?"** Backgrounds and
+   continuously scrolling content may cross; a button, QR code, or drag handle may not.
+7. **Occlusion covers; division splits.** Treating a division region as occlusion is the
+   most common Duo layout bug.
+8. **Keep navigation outside `ArrangementView`.** It is a layout container with no
+   navigation infrastructure. Never nest `NavigationSplitView` inside one.
+9. **Never put `ArrangementView` inside `List` or `ScrollView`.**
+10. **Never target the two displays as independent canvases.** Use scenes and scene
+    accessories. New windows cannot be created on the outer display.
+11. **Duo-only capability is always additive.** The app stays whole when the hinge,
+    accessory, or second display is absent. A nil hinge means the device has none.
+12. **Never invent a dimension.** Apple publishes pixel sizes but **not** logical point
+    sizes and **not** the native scale. Query the environment.
+13. **Never invent an API.** If the manifest lacks it or the SDK cannot resolve it,
+    report it `SDK-blocked` and stop.
 
-Implement first. Typical work:
+### Reject on sight
 
-```text
-size classes
-container-relative layout
-NavigationSplitView / NavigationStack
-adaptive TabView and sidebar placement
-adaptive grids
-ViewThatFits / AnyLayout
-safe areas and layout margins
-system sheets / alerts / popovers
-system toolbar adoption
-state continuity during resizing
-removing UIScreen.main and orientation assumptions
+```swift
+if isDuo { DuoDashboard() } else { Dashboard() }     // 1
+if isFolded { CompactRoot() } else { ExpandedRoot() } // 1, 3
+let width = UIScreen.main.bounds.width                // 12 — and UIScreen.main is going away
+if UIDevice.current.userInterfaceIdiom == .pad { }    // 1
+if orientation == .landscape { }                      // inner display ignores orientation
+if hinge.angle.degrees > 120 { showSidebar = true }   // 2
 ```
 
-Tier 1 should improve ordinary iPhones, iPhone Mirroring, split view, and other resizable environments too.
-
-### Tier 2 — Duo-aware presentation
-
-Add only after Tier 1 is sound:
-
-```text
-reserved division/occlusion regions
-displacement around the fold
-ArrangementView split/overlay layouts
-vertical bar representations
-vertical toolbar compression / overflow behavior
-fold-sensitive placement of manually laid out controls
-```
-
-### Tier 3 — Duo-exclusive capability
-
-Add only when it creates genuine product value:
-
-```text
-onHingeChange physical interactions
-multi-scene workflows
-scene accessories
-camera capture accessories
-explicit Duo camera direction coordination
-```
-
-Do not escalate to Tier 2 or Tier 3 merely because the user mentioned iPhone Duo.
+The full machine-readable catalog is `data/patterns.json`; `scripts/audit-duo.sh`
+executes it. Do not re-type these patterns anywhere.
 
 ---
 
-## Required workflow
+## Three concepts agents conflate
 
-### 1. Establish the build context
+| Concept | What it describes | Drives |
+|---|---|---|
+| **Safe areas** | Where system UI sits | Insetting content — always |
+| **Reserved regions** | Physical areas *inside* usable geometry: the two cameras, the fold | Displacing hand-laid-out content |
+| **Hinge input** | How open the device physically is | Interaction and effects — never layout |
 
-Before proposing Duo-only code, inspect:
+---
 
-- UI framework: SwiftUI, UIKit, or mixed;
-- deployment target;
-- active Xcode and SDK version if available;
-- navigation architecture;
-- state ownership model;
-- presence of custom bars, custom geometry, camera code, or multi-scene support.
+## Tiers
 
-If the SDK cannot verify a documented Duo API, clearly mark that work **SDK-blocked** rather than guessing.
+Classify every change before editing. Earn each tier before the next.
 
-### 2. Audit the repository
+| Tier | Scope | Gate |
+|---|---|---|
+| **1** | Universal adaptive: size classes, container-relative layout, adaptive grids, safe areas, system navigation, state continuity | Do first. Needs no Duo API and improves every device. |
+| **2** | Duo-aware presentation: reserved regions, displacement, `ArrangementView`, vertical bar tuning, overflow priority | Only after Tier 1 is sound. Needs iOS 27.1 SDK. |
+| **3** | Duo-exclusive: hinge interaction, multiple scenes, scene accessories, camera direction coordination | Only when it creates real product value. |
 
-Search for these high-risk patterns:
+Mentioning iPhone Duo is not a reason to reach Tier 2 or 3. Tier 3 novelty never
+outranks Tier 1 correctness.
 
-```text
-UIScreen.main
-UIScreen.main.bounds
-UIDevice.current.userInterfaceIdiom
-userInterfaceIdiom
-interfaceOrientation
-orientation ==
-isLandscape / isPortrait
-isDuo / isFolded / isUnfolded
-fixed large .frame(width: ...)
-manual screen-width breakpoints
-custom bottom bars / fake navigation bars
-fixed grid column counts
-safe-area mirroring assumptions
-separate compact/expanded state stores
-```
+---
 
-Do not mechanically replace every match. Determine whether each use actually controls layout.
+## Workflow
 
-### 3. Audit each screen in this order
+### 1. Establish context
 
-Ask:
+UI framework, deployment target, active Xcode/SDK, navigation architecture, state
+ownership, and whether custom bars, hand-built geometry, camera code, or multi-scene
+support exist.
 
-1. Does it remain usable from very narrow through intermediate to expansive widths?
-2. Is the information hierarchy appropriate at wider sizes, or merely stretched?
-3. Is navigation using a semantic system container?
-4. Are text and forms capped to a readable width?
-5. Can grids adapt by minimum item width rather than fixed column count?
-6. Do system bars replace custom controls where possible?
-7. Could any important control, text, image focal point, QR code, handle, or editor affordance intersect a fold/occlusion region?
-8. Are two related content surfaces a legitimate `ArrangementView` candidate?
-9. Is any behavior genuinely physical and therefore a hinge candidate?
-10. Would a second-display accessory create useful supplementary value without becoming required for the main workflow?
+SDK reality, per Apple: apps run un-recompiled; the **iOS 27 SDK** extends the app left
+of the status bar on the inner display; the **iOS 27.1 SDK** reaches the screen edge and
+lays bars out vertically. Tier 2 and 3 need 27.1. Test in the iPhone Duo simulator via
+**DeviceHub** in Xcode 27.1, which can open, close, rotate, and fold the device.
 
-### 4. Produce a change plan before broad refactors
+### 2. Scan
 
-For non-trivial repositories, return a compact table containing:
+Run `scripts/audit-duo.sh <project-root>` from the installed skill directory. It reads
+`data/patterns.json` and ranks hits P0–P2. It is a grep: every hit needs judgment about
+whether it actually controls layout.
 
-```text
-file / screen
-observed problem
-user impact
-Tier 1/2/3
-recommended system API or pattern
-state-continuity risk
-SDK/test dependency
-```
+### 3. Audit each screen
 
-Prefer the smallest coherent transformation. Do not redesign unrelated product UX simply to demonstrate Duo APIs.
+1. Usable from very narrow through intermediate to expansive width?
+2. Does wider space improve hierarchy, or merely stretch?
+3. Is navigation a semantic system container?
+4. Is body text capped to a readable measure?
+5. Do grids adapt by minimum item width — and land on an **even** column count, so
+   content divides cleanly across the fold?
+6. Is every action in a custom bar expressible as a `ToolbarItem`? List those that
+   are not, with the reason.
+7. Could any control, QR code, drag handle, or image focal point intersect a reserved
+   region?
+8. Are two related surfaces a real `ArrangementView` candidate?
+9. Is any behavior genuinely *physical*, and therefore a hinge candidate?
+10. Would a scene accessory add supplementary value without becoming required?
+
+### 4. Plan before refactoring
+
+Return a table: file/screen · observed problem · user impact · tier · recommended API ·
+state-continuity risk · SDK dependency. Prefer the smallest coherent transformation.
+Never redesign unrelated UX to demonstrate a Duo API.
 
 ### 5. Implement Tier 1 first
 
-Preferred decision order for ordinary responsive layout:
+Decision order for ordinary responsive layout:
 
 ```text
 system navigation/content container
-→ adaptive grid/layout container
+→ adaptive grid or layout container
 → ViewThatFits / AnyLayout
 → size classes
 → local geometry
-→ exact measured threshold only when semantically justified
+→ measured threshold, only when semantically justified
 ```
 
-Use width thresholds only when they represent a real minimum usable content width, not guessed device categories.
+**A width threshold is allowed only if you can name the content that stops fitting
+below it, and you write that derivation inline** — `// 2 × 220pt card + 16pt gutter = 456`.
+No derivation, no threshold: use `ViewThatFits`.
 
 ### 6. Add fold awareness locally
 
-If a fold affects one critical element, displace that element or its local container. Do not rebuild the whole screen.
+If a fold affects one element, displace that element or its local container. Do not
+rebuild the screen. Move the shortest distance that clears the region, and never
+displace across the fold into the other half. Avoid dramatic rearrangement while
+someone is folding — small tracked movement beats a replacement layout.
 
-Use reserved regions only where manually laid-out content needs knowledge of the fold/camera. Standard containers should be allowed to adapt on their own.
+Query reserved regions only where **you** lay out content by hand. System containers
+already adapt.
 
-### 7. Add arrangements only for two-part experiences
+### 7. Arrangements for genuine two-part experiences
 
-Good candidates:
+Good: player + queue, preview + controls, editor + inspector, canvas + properties,
+camera preview + capture controls. Split when both surfaces deserve dedicated space;
+overlay when one is clearly supplementary and partial obscuration is acceptable. An
+existing `HStack`/`VStack` maps to split; a `ZStack` maps to overlay.
 
-```text
-player + queue
-preview + controls
-editor + inspector
-canvas + properties
-content + supplementary metadata
-camera preview + capture controls
-```
+### 8. Hinge only for physical interaction
 
-Use split when both surfaces deserve dedicated space; use overlay when one surface is clearly foreground/supplementary and partial obscuration is acceptable.
+Good: instrument pitch bend, physical game input, tabletop controls, camera pose,
+mechanical-feeling animation. Bad: anything that decides columns, sidebars, or
+navigation. Always unwrap the optional hinge and reset transient interaction state when
+the pose ends.
 
-### 8. Add hinge behavior only for physical interaction
+### 9. Bars
 
-Good candidates:
+Controls move to the side on the outer display and on the inner display in landscape.
+**The inner display in portrait keeps standard horizontal bars** — that is the exception.
+In Split View each app puts its controls on its **outer** edge. Because the bar is
+hardware-aligned it **stays on the same side in right-to-left languages** — do not flip it.
 
-```text
-instrument pitch/effect
-physical game input
-tabletop controls
-camera posture behavior
-mechanical-feeling animation tied to device pose
-```
+Reserve the top of the vertical axis for back/close, then prominent actions. Give every
+non-text item both a title and a symbol — the title is what overflow menus show. Keep
+text-only buttons rare; they stay horizontal. Group items instead of spacing them by
+hand: flexible spacers are zero-size vertically. Let the system own the ellipsis.
 
-Bad candidates:
+### 10. Verify state continuity
 
-```text
-show sidebar when angle > X
-use 3 columns when flat
-collapse navigation when partly folded
-select compact UI from hinge status
-```
+Across compact ↔ regular, outer ↔ inner, fold, and Split View resizing, confirm:
+navigation path, selection, scroll position, focused field, draft content, playback,
+active filters, sheet intent, unsaved work, and scene-local state. Adaptive presentation
+must never create a second source of truth.
 
-Always handle a missing hinge and reset transient interaction state when the relevant hinge state ends.
+### 11. Build and report honestly
 
-### 9. Validate bars and navigation
+Build after each coherent batch. Exercise intermediate widths, not just the two endpoint
+poses. Label every claim with exactly one of:
 
-When system bars are present, inspect:
+| Label | Means |
+|---|---|
+| `verified` | Ran it and observed the result |
+| `compile-verified only` | It builds; behavior unobserved |
+| `design-verified` | Reasoned from code; nothing executed |
+| `SDK-blocked` | Symbol unavailable in the active SDK |
+| `deferred` | Deliberately out of scope |
 
-- back/close placement;
-- prominent actions;
-- symbol and title availability;
-- custom-view ability to represent vertically;
-- item `axisBehavior` where needed;
-- toolbar/tab compression priority;
-- overflow menu composition;
-- item visibility priority;
-- keyboard-induced compression;
-- outer-display landscape;
-- right-to-left layout assumptions.
-
-Do not reserve the ellipsis symbol for an unrelated action when system overflow is in use.
-
-### 10. Validate state continuity
-
-During compact ↔ regular, outer ↔ inner, fold/unfold, and split-view resizing, explicitly verify:
-
-```text
-navigation path
-selected item
-scroll position
-focused field
-editor/draft content
-playback state
-active filters
-sheet/popover intent
-unsaved work
-scene-specific state
-```
-
-Adaptive presentation must not create a second source of truth.
-
-### 11. Compile and test in coherent batches
-
-After each structural batch:
-
-- build the affected target;
-- fix compile errors before moving on;
-- exercise multiple widths, not only “closed” and “open”;
-- run the matrix in `references/06-testing-and-review.md` when simulator support is available;
-- distinguish **verified**, **not testable in current environment**, and **deferred** findings.
+If no Duo simulator is available, mark rows `design-verified` and stop. **Never describe
+an unexecuted check as a test.**
 
 ---
 
-## Review severity
+## Games
 
-Use these levels when auditing:
+Lock to portrait or landscape if you must, but fill the screen in every pose. Prefer
+changing aspect ratio over letterboxing or pillarboxing; if padding is unavoidable, fill
+it with artwork. Keep text and control sizes consistent as the device resizes.
 
-- **P0 — functional breakage:** content inaccessible, action obscured, state loss, crash, camera/session failure.
-- **P1 — architectural incompatibility:** device-identity layout, custom navigation that blocks adaptation, hard screen assumptions, duplicated state trees.
-- **P2 — degraded Duo experience:** stretched wide UI, poor vertical bar representation, fold-adjacent critical content, weak overflow prioritization.
-- **P3 — enhancement:** ArrangementView opportunity, optional scene accessory, hinge-native interaction, camera polish.
+## Severity
 
-Do not present Tier 3 novelty as more important than Tier 1 correctness.
+**P0** functional breakage — content unreachable, action obscured, state lost, crash,
+capture failure. **P1** architectural incompatibility — device-identity layout, hinge
+driving layout, custom navigation that blocks adaptation, duplicated state trees.
+**P2** degraded experience — stretched wide UI, weak vertical bar representation,
+fold-adjacent critical content, poor overflow priority. **P3** enhancement — arrangement
+opportunity, optional accessory, hinge-native interaction.
 
----
+## Reporting
 
-## Output contract for repository reviews
+Use the report templates and full test matrix in `references/06-testing-and-review.md`.
+Review output: verdict · evidence with file paths · tier · P0–P3 order · implementation
+sequence · test plan · SDK caveats. Implementation output: the same structure, as a
+completion summary with build evidence.
 
-When asked to review but not modify code, return:
-
-1. **Readiness verdict** — Ready / Mostly adaptive / Material refactor needed.
-2. **Evidence-backed findings** — file paths and relevant symbols/lines.
-3. **Tier classification** — universal, Duo-aware, or Duo-exclusive.
-4. **Priority order** — P0 through P3.
-5. **Implementation sequence** — smallest safe batches.
-6. **Test plan** — widths/poses/scenes that matter for this app.
-7. **SDK caveats** — any iOS 27.1 API that was not verifiable.
-
-When asked to implement, make the changes and then report the same structure as a completion summary with build/test evidence.
-
----
-
-## Red flags to reject during code review
-
-```swift
-if isDuo { DuoDashboard() } else { Dashboard() }
-if isFolded { CompactRoot() } else { ExpandedRoot() }
-let width = UIScreen.main.bounds.width
-if UIDevice.current.userInterfaceIdiom == .pad { ... }
-if orientation == .landscape { ... }
-if hinge.angle.degrees > 120 { showSidebar = true }
-```
-
-Also flag:
-
-- global screen geometry for local container layout;
-- mirrored safe-area assumptions;
-- fixed sidebar widths without content rationale;
-- custom tab bars that cannot reorient or overflow;
-- long toolbar text that has no symbol representation;
-- fixed spacer tricks inside system bars;
-- critical content centered on the fold;
-- layouts tested only at two endpoint sizes;
-- multiple independent view models for compact and expanded versions of the same feature;
-- manual attempts to move the primary app UI to a second physical display;
-- exact camera selection logic that ignores device direction changes.
-
----
-
-## Completion definition
-
-A Duo adaptation is complete only when:
-
-- ordinary responsive layout works across a continuum of widths;
-- information hierarchy improves appropriately on expansive space;
-- navigation and state survive resizing;
-- system bars are allowed to adapt unless there is a documented reason to opt out;
-- important content avoids safe areas and active reserved regions;
-- fold-specific displacement is minimal and contextual;
-- `ArrangementView` is used only where semantically appropriate;
-- hinge APIs drive physical interactions rather than routine layout;
-- second-display content is supplementary and availability-aware;
-- camera behavior remains directionally correct if camera features exist;
-- all implemented SDK symbols compile in the target environment, or unavailable work is explicitly isolated and deferred;
-- the test report includes intermediate widths and split-view conditions, not only fully closed/open states.
-
-The objective is not to make the code “Duo-aware” everywhere. The objective is to remove assumptions so the product feels native everywhere, then exploit Duo hardware only where the experience becomes materially better.
+When Apple's current documentation disagrees with this skill, **Apple wins** — see the
+source-precedence ladder in `references/08-sources.md`. Do not force code from here.

@@ -1,4 +1,4 @@
-# 04 — Split-view multitasking, scenes, and multiple displays
+# 04 — Hardware capabilities: hinge, scenes, and accessories
 
 Use this reference when the app can run beside another app, supports multiple windows/scenes, or wants supplementary content on another display.
 
@@ -182,6 +182,84 @@ Before adding a second-display feature, answer:
 7. Does the app remain complete when running on a non-Duo device?
 
 The privacy question is particularly important for outer-display content: supplementary information may be visible to another person by design.
+
+## Hinge API
+
+SwiftUI provides `onHingeChange` for live hinge context. Apple describes high-level status values including closed, partially open, and fully open, plus continuous angle updates.
+
+Pattern:
+
+```swift
+struct InstrumentView: View {
+    @State private var effectAmount = 0.0
+
+    var body: some View {
+        InstrumentSurface(effectAmount: effectAmount)
+            .onHingeChange { _, context in
+                if let hinge = context.hinge,
+                   hinge.status == .partiallyOpen {
+                    effectAmount = mapAngle(hinge.angle)
+                } else {
+                    effectAmount = 0
+                }
+            }
+    }
+}
+```
+
+Always handle `context.hinge == nil`, because the code may run on devices without a hinge.
+
+## Good hinge use cases
+
+Use hinge data when the **physical bend itself** is part of the product interaction:
+
+- musical pitch/modulation;
+- game steering or mechanical input;
+- tabletop controller effects;
+- camera pose behavior;
+- a physical-book effect whose state is directly tied to device motion;
+- a deliberate tactile animation synchronized with folding.
+
+## Bad hinge use cases
+
+Never write ordinary layout logic such as:
+
+```swift
+if hinge.angle.degrees > 120 {
+    showSidebar = true
+}
+```
+
+or:
+
+```swift
+columns = hinge.status == .fullyOpen ? 3 : 1
+```
+
+Use available space, size classes, arrangement rules, or reserved regions for those decisions.
+
+## Hinge-state lifecycle
+
+When a continuous hinge effect applies only while partially open:
+
+1. enter the relevant pose;
+2. update interaction state continuously;
+3. clamp/normalize values if necessary;
+4. reset state when the pose ends;
+5. ensure no stale value remains after closing/opening fully;
+6. make the feature harmless on devices without a hinge.
+
+Do not persist transient hinge angle as long-lived application state unless the product explicitly requires it.
+
+## Performance
+
+Hinge callbacks can update frequently. Keep work lightweight:
+
+- map angles with pure math;
+- avoid network/database work;
+- avoid rebuilding unrelated view models;
+- throttle only when a genuinely expensive downstream effect requires it;
+- drive animations/effects from a compact state value.
 
 ## Multitasking audit
 

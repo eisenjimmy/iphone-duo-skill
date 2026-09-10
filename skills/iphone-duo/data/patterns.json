@@ -1,0 +1,107 @@
+{
+  "patternsVersion": "2.0.0",
+  "note": "Canonical enumeration of Duo-hostile code patterns. This file is the SINGLE SOURCE OF TRUTH. scripts/audit-duo.sh consumes it; SKILL.md and references/06 point at it instead of re-listing regexes. Add a pattern here and every consumer picks it up.",
+  "categories": [
+    {
+      "id": "global-screen-geometry",
+      "title": "Global screen geometry",
+      "severity": "P1",
+      "tier": 1,
+      "why": "UIScreen.main is ambiguous on a two-display device and will be deprecated. Global geometry cannot describe a resizable, asymmetric, possibly-split container.",
+      "fix": "window?.windowScene?.screen for the screen; traitCollection.displayScale for scale; GeometryReader / scene bounds for size.",
+      "expectZeroInDuoReadyApp": true,
+      "patterns": ["UIScreen\\.main", "UIScreen\\.screens", "\\bmainScreen\\b", "UIScreen\\.main\\.bounds", "UIScreen\\.main\\.scale", "nativeBounds", "nativeScale"]
+    },
+    {
+      "id": "device-identity-branch",
+      "title": "Device-identity layout branch",
+      "severity": "P1",
+      "tier": 1,
+      "why": "Layout must react to available space, not to which device or which display it is running on. Identity branches produce two divergent UIs that drift.",
+      "fix": "Size classes, container geometry, ViewThatFits/AnyLayout, or a real minimum-content-width threshold.",
+      "expectZeroInDuoReadyApp": true,
+      "patterns": ["isDuo", "isFolded", "isUnfolded", "isInnerDisplay", "isOuterDisplay", "userInterfaceIdiom", "UIDevice\\.current\\.model", "modelIdentifier", "\\bisIPad\\b", "\\bisIPhone\\b"]
+    },
+    {
+      "id": "orientation-as-layout",
+      "title": "Orientation used as a layout switch",
+      "severity": "P1",
+      "tier": 1,
+      "why": "The inner display does not honor supported interface orientations, and is regular in BOTH dimensions. Orientation is not a proxy for available space.",
+      "fix": "horizontalSizeClass / verticalSizeClass, or measured container width.",
+      "expectZeroInDuoReadyApp": true,
+      "patterns": ["interfaceOrientation", "UIDeviceOrientation", "isLandscape", "isPortrait", "orientation\\s*==", "supportedInterfaceOrientations", "shouldAutorotate"]
+    },
+    {
+      "id": "hardcoded-dimensions",
+      "title": "Hardcoded screen-derived dimensions",
+      "severity": "P2",
+      "tier": 1,
+      "why": "Apple does not publish iPhone Duo logical point sizes or native scale. Any copied constant is a guess that breaks on resize and in Split View.",
+      "fix": "Container-relative sizing; thresholds only where they express a real minimum usable content width.",
+      "expectZeroInDuoReadyApp": false,
+      "patterns": ["\\.frame\\(width:\\s*[0-9]{3,}", "\\.frame\\(height:\\s*[0-9]{3,}", "width:\\s*(320|375|390|393|402|414|428|430|440)\\b", "== 428", "> 768", "< 375"]
+    },
+    {
+      "id": "fixed-grid-columns",
+      "title": "Fixed grid column count",
+      "severity": "P2",
+      "tier": 2,
+      "why": "Columns must adapt to width, and Apple advises an EVEN column count so content divides cleanly across the folding region.",
+      "fix": "GridItem(.adaptive(minimum:)) sized so the natural count stays even at Duo widths.",
+      "expectZeroInDuoReadyApp": false,
+      "patterns": ["GridItem\\(\\.fixed", "count:\\s*[0-9]+\\s*\\)", "Array\\(repeating:\\s*GridItem", "columns\\s*=\\s*[0-9]"]
+    },
+    {
+      "id": "custom-bars",
+      "title": "Custom bar instead of a system bar",
+      "severity": "P2",
+      "tier": 2,
+      "why": "Only container-provided bars participate in the vertical bar region. Content in a hand-rolled UIToolbar/UINavigationBar/UITabBar is not considered, and cannot overflow or reorient.",
+      "fix": "NavigationStack/NavigationSplitView + .toolbar, or UINavigationController/UITabBarController.",
+      "expectZeroInDuoReadyApp": false,
+      "patterns": ["UIToolbar\\(", "UITabBar\\(", "UINavigationBar\\(", "customBottomBar", "CustomTabBar", "customToolbar", "FakeNavBar"]
+    },
+    {
+      "id": "bar-spacing-hacks",
+      "title": "Manual spacing inside a bar",
+      "severity": "P2",
+      "tier": 2,
+      "why": "Flexible spacers have zero size on the vertical axis. Manual spacing collapses or misaligns when the bar rotates.",
+      "fix": "ToolbarItemGroup / UIBarButtonItemGroup, which space themselves and adapt.",
+      "expectZeroInDuoReadyApp": false,
+      "patterns": ["flexibleSpace", "fixedSpace", "\\.flexibleSpace", "UIBarButtonItem\\.SystemItem\\.flexibleSpace"]
+    },
+    {
+      "id": "hinge-as-layout",
+      "title": "Hinge state driving ordinary layout",
+      "severity": "P1",
+      "tier": 3,
+      "why": "Apple is explicit: hinge data is for interactions and effects, not layout. Layout belongs to arrangement and reserved-region APIs.",
+      "fix": "reservedRegions(kind:) and ArrangementView for layout; keep onHingeChange for physical interaction only.",
+      "expectZeroInDuoReadyApp": false,
+      "patterns": ["hinge.*(showSidebar|columns|layout|collapse)", "angle\\s*[<>]=?\\s*[0-9]+.*\\b(layout|column|sidebar)", "status\\s*==\\s*\\.partiallyOpen.*layout"]
+    },
+    {
+      "id": "duo-api-surface",
+      "title": "Duo API adoption surface",
+      "severity": "info",
+      "tier": 2,
+      "why": "Not a defect — an inventory of which Duo APIs the codebase already touches, so the audit can report adoption depth.",
+      "fix": "n/a — informational.",
+      "expectZeroInDuoReadyApp": false,
+      "manifestBacked": true,
+      "patterns": ["reservedRegions", "ReservedRegion", "ArrangementView", "arrangementViewStyle", "UIArrangementViewController", "overlayArrangementZIndex", "onHingeChange", "UIHingeInteraction", "sceneAccessory", "CameraCaptureAccessory", "UISceneAccessory", "axisBehavior", "toolbarVerticalEdge", "verticalBarEdge", "toolbarVerticalBehavior", "verticalBarCompressionBehavior", "visibilityPriority", "ToolbarOverflowMenu", "additionalOverflowItems", "AVCaptureDeviceDirectionCoordinator", "topBarPinnedTrailing", "defaultTabBarPlacement"]
+    },
+    {
+      "id": "duplicate-state",
+      "title": "Parallel compact/expanded state",
+      "severity": "P0",
+      "tier": 1,
+      "why": "Two sources of truth for one feature means folding the device silently loses navigation path, selection, drafts or playback.",
+      "fix": "One state owner; adaptive presentation reads from it.",
+      "expectZeroInDuoReadyApp": true,
+      "patterns": ["compactViewModel", "expandedViewModel", "phoneViewModel", "padViewModel", "CompactRoot", "ExpandedRoot"]
+    }
+  ]
+}

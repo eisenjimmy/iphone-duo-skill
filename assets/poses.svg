@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 316" width="1180" height="316" role="img" aria-label="The five iPhone Duo poses — closed, portrait, landscape, seated, standing — and the layout each implies">
+  <style>
+    .sans{font-family:'Geist',ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    .mono{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace}
+    .serif{font-family:'Instrument Serif',ui-serif,Georgia,serif}
+    .eyebrow{font-size:8px;font-weight:500;letter-spacing:.18em;fill:#7a8399}
+    .name{font-size:12px;font-weight:600;fill:#2d3142}
+    .sub{font-size:9px;fill:#7a8399;letter-spacing:.02em}
+    .callout{font-size:14px;font-style:italic;fill:#4f5d75}
+    .screen{fill:#ffffff;stroke:#2d3142;stroke-width:1.4;stroke-linejoin:round}
+    .back{fill:#ececec;stroke:#2d3142;stroke-width:1.4;stroke-linejoin:round}
+    .bar{fill:#2d3142;opacity:.07}
+    .cell{fill:#4f5d75;opacity:.18}
+  </style>
+  <rect width="1180" height="316" fill="#f5f5f5"/>
+  <text class="mono eyebrow" x="36" y="34">FIVE POSES · ONE LAYOUT SYSTEM</text>
+  <line x1="36" y1="46" x2="1144" y2="46" stroke="#bfc0c0"/>
+
+  <!-- 1 CLOSED -->
+  <g transform="translate(36 70)">
+    <g transform="translate(98 78)">
+      <rect x="-33" y="-58" width="66" height="116" rx="9" class="screen"/>
+      <rect x="-29" y="-52" width="13" height="104" rx="5" class="bar"/>
+      <circle cx="-22.5" cy="-42" r="2.8" fill="#4f5d75"/><circle cx="-22.5" cy="-31" r="2.8" fill="#7a8399"/><circle cx="-22.5" cy="-20" r="2.8" fill="#7a8399"/>
+      <rect x="-31" y="-56" width="15" height="6" rx="3" fill="#2d3142"/>
+      <g class="cell"><rect x="-11" y="-40" width="39" height="8" rx="4"/><rect x="-11" y="-27" width="30" height="8" rx="4"/><rect x="-11" y="-14" width="36" height="8" rx="4"/><rect x="-11" y="-1" width="26" height="8" rx="4"/></g>
+    </g>
+    <text class="sans name" x="98" y="164" text-anchor="middle">Closed</text>
+    <text class="mono sub" x="98" y="180" text-anchor="middle">outer · compact width</text>
+  </g>
+
+  <!-- 2 PORTRAIT -->
+  <g transform="translate(254 70)">
+    <g transform="translate(98 78)">
+      <rect x="-50" y="-58" width="100" height="116" rx="9" class="screen"/>
+      <rect x="-44" y="-52" width="88" height="10" rx="5" class="bar"/>
+      <rect x="-44" y="42" width="88" height="10" rx="5" class="bar"/>
+      <g class="cell"><rect x="-44" y="-34" width="42" height="30" rx="5"/><rect x="2" y="-34" width="42" height="30" rx="5"/><rect x="-44" y="2" width="42" height="30" rx="5"/><rect x="2" y="2" width="42" height="30" rx="5"/></g>
+      <line x1="0" y1="-58" x2="0" y2="58" stroke="#bfc0c0" stroke-width="1"/>
+    </g>
+    <text class="sans name" x="98" y="164" text-anchor="middle">Portrait</text>
+    <text class="mono sub" x="98" y="180" text-anchor="middle">bars stay horizontal</text>
+  </g>
+
+  <!-- 3 LANDSCAPE -->
+  <g transform="translate(472 70)">
+    <g transform="translate(98 78)">
+      <rect x="-56" y="-44" width="112" height="88" rx="9" class="screen"/>
+      <rect x="-50" y="-38" width="11" height="76" rx="5" class="bar"/>
+      <circle cx="-44.5" cy="-28" r="2.6" fill="#4f5d75"/><circle cx="-44.5" cy="-18" r="2.6" fill="#7a8399"/>
+      <g class="cell"><rect x="-32" y="-36" width="40" height="32" rx="5"/><rect x="12" y="-36" width="40" height="32" rx="5"/><rect x="-32" y="0" width="40" height="32" rx="5"/><rect x="12" y="0" width="40" height="32" rx="5"/></g>
+      <line x1="0" y1="-44" x2="0" y2="44" stroke="#bfc0c0" stroke-width="1"/>
+    </g>
+    <text class="sans name" x="98" y="164" text-anchor="middle">Landscape</text>
+    <text class="mono sub" x="98" y="180" text-anchor="middle">controls move to the side</text>
+  </g>
+
+  <!-- 4 SEATED — the focal pose: the fold is live -->
+  <g transform="translate(690 70)">
+    <g transform="translate(98 86)">
+      <path d="M-54 22 L-5 22 L-5 -34 L-50 -45 Z" class="screen"/>
+      <path d="M5 22 L56 22 L56 5 L5 5 Z" class="back"/>
+      <g class="cell"><rect x="-44" y="-30" width="34" height="20" rx="4"/><rect x="-44" y="-6" width="34" height="20" rx="4"/></g>
+      <g fill="#7a8399" opacity=".5"><rect x="13" y="10" width="13" height="6" rx="3"/><rect x="31" y="10" width="13" height="6" rx="3"/></g>
+      <rect x="-5" y="-34" width="10" height="56" fill="rgba(235,108,54,0.08)"/>
+      <line x1="-5" y1="-34" x2="-5" y2="22" stroke="#eb6c36" stroke-width="1.5"/>
+      <line x1="5" y1="-34" x2="5" y2="22" stroke="#eb6c36" stroke-width="1.5"/>
+      <line x1="-70" y1="22" x2="72" y2="22" stroke="#bfc0c0" stroke-width="1"/>
+    </g>
+    <text class="sans name" x="98" y="164" text-anchor="middle">Seated</text>
+    <text style="fill:#eb6c36" class="mono sub" x="98" y="180" text-anchor="middle">folding region divides</text>
+  </g>
+
+  <!-- 5 STANDING -->
+  <g transform="translate(908 70)">
+    <g transform="translate(98 86)">
+      <path d="M-42 22 L-6 -42 L2 -38 L-33 22 Z" class="screen"/>
+      <path d="M42 22 L6 -42 L-2 -38 L33 22 Z" class="back"/>
+      <circle cx="0" cy="-40" r="3.6" fill="#2d3142"/>
+      <line x1="-62" y1="22" x2="62" y2="22" stroke="#bfc0c0" stroke-width="1"/>
+    </g>
+    <text class="sans name" x="98" y="164" text-anchor="middle">Standing</text>
+    <text class="mono sub" x="98" y="180" text-anchor="middle">hinge as interaction input</text>
+  </g>
+
+  <line x1="36" y1="258" x2="1144" y2="258" stroke="#bfc0c0"/>
+  <text class="serif callout" x="36" y="284">Don't design five layouts. Design one that reacts to available space — the poses fall out of it.</text>
+</svg>

@@ -2,6 +2,15 @@
 
 Use this reference when a screen has navigation stacks/split views, tab bars, toolbars, custom bars, overflow behavior, or actions that must adapt between horizontal and vertical presentation.
 
+## The one exception, stated first
+
+Controls move to the side on the **outer display** and on the **inner display in landscape**.
+**The inner display in portrait keeps standard horizontal bars** — it has the vertical space.
+Everything below assumes a vertical bar; this is when there isn't one.
+
+In **Split View**, each app places its controls along its **outer** edge — the left app has
+controls on the left. Account for that when you reason about which side is "yours".
+
 ## Why Duo bars matter
 
 On iPhone Duo, system navigation, toolbar, and tab controls can share a **vertical bar region** along the side of the display. This preserves vertical content space and improves reachability on the wider form factor. When the device opens in landscape, the side placement can remain stable so controls don't jump unnecessarily during display transitions.
@@ -47,7 +56,7 @@ expansive:   list | detail
 
 Keep the selection source of truth stable so moving between compact and regular presentation doesn't reset the selected item.
 
-For tab-driven products, evaluate sidebar presentation at expansive sizes. Apple documents `defaultTabBarPlacement(.sidebar)` for using a sidebar presentation where appropriate.
+For tab-driven products, evaluate sidebar presentation at expansive sizes. `defaultTabBarPlacement(.sidebar)` is documented and shipping (iOS 27.0).
 
 Do not manually invent a sidebar solely because a device is open.
 
@@ -126,7 +135,7 @@ Verify exact API availability against the active SDK.
 
 ## Detecting vertical bar context
 
-For custom views that genuinely need a different internal composition in a vertical bar, Apple documents the SwiftUI environment value conceptually as:
+For custom views that genuinely need a different internal composition in a vertical bar, Apple's Tech Talk 111462 shows the SwiftUI environment value as:
 
 ```swift
 @Environment(\.toolbarVerticalEdge) private var toolbarVerticalEdge
@@ -149,6 +158,12 @@ manual offsets to separate action clusters
 ```
 
 inside system bar content unless there is a narrowly justified visual requirement.
+
+## Locate controls near the content they affect
+
+When controls belong to a content area other than the one along the trailing edge, keep them
+with that area rather than moving them to the side. In Mail, controls that act on the message
+*list* stay above the leading pane, so it is clear they do not act on the open message.
 
 ## Overflow
 
@@ -192,6 +207,20 @@ Prefer assigning priority to semantic groups first, then individual items if nec
 
 ## Toolbar versus tab compression
 
+The HIG states the policy without needing any 27.1 symbol:
+
+- **Navigation-focused experiences:** move toolbar items into the overflow menu so the tab
+  bar and primary destinations stay reachable. **This is the default** — you may not need to
+  write anything.
+- **Task-oriented experiences:** minimize the tab bar to preserve the toolbar actions central
+  to the task. This mirrors the existing minimized tab bar on other iPhones — see the
+  verified `tabBarMinimizeBehavior(_:)` (iOS 26.0).
+
+> `toolbarVerticalCompressionBehavior` / `verticalBarCompressionBehavior` are **talk-sourced
+> (27.1)** and unresolvable in published docs today. `toolbarMinimizationBehavior(_:for:)`
+> (27.0) and `tabBarMinimizeBehavior(_:)` (26.0) are verified and adjacent — but they are
+> **not the same API**. Do not silently substitute one for the other.
+
 When the shared bar gets crowded, decide which class of controls should remain visible longer.
 
 Navigation-centric app:
@@ -208,7 +237,6 @@ preserve critical creation/editing controls
 allow less critical navigation chrome to compress where system APIs permit
 ```
 
-Apple documents `toolbarVerticalCompressionBehavior` for controlling this relationship. Verify exact enum cases in the active SDK before using them.
 
 ## When to opt out of vertical bars
 
@@ -229,6 +257,11 @@ SwiftUI documentation shown by Apple includes:
 Do not disable vertical bars merely because the existing custom design was authored horizontally.
 
 ## RTL behavior
+
+**The bar does not flip.** Because controls on the vertical axis stay aligned with the
+hardware, they hold the same position relative to the camera and **stay on the same side in
+right-to-left languages**. Do not mirror it manually; validate RTL, but expect the side to
+be stable.
 
 Do not assume the side bar mirrors like an arbitrary leading/trailing stack. Apple's system bar placement is tied to hardware and interaction behavior, so validate right-to-left localization rather than manually mirroring based on language.
 

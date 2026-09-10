@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-label="iPhone Duo Agent Skill — one adaptive app, every pose">
+  <style>
+    .sans{font-family:'Geist',ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    .mono{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace}
+    .serif{font-family:'Instrument Serif',ui-serif,Georgia,'Times New Roman',serif}
+    .eyebrow{font-size:11px;font-weight:500;letter-spacing:.18em;fill:#7a8399}
+    .h1{font-size:62px;font-weight:400;fill:#2d3142}
+    .sub{font-size:17px;fill:#4f5d75}
+    .callout{font-size:15px;font-style:italic;fill:#4f5d75}
+  </style>
+  <rect width="1280" height="340" fill="#f5f5f5"/>
+  <rect x="0" y="0" width="6" height="340" fill="#eb6c36"/>
+
+  <g transform="translate(76 80)">
+    <text class="mono eyebrow" x="2" y="0">AGENT SKILL · IPHONE DUO</text>
+    <text class="serif h1" x="0" y="62">Design · Audit · Adapt</text>
+    <line x1="1" y1="88" x2="392" y2="88" stroke="#bfc0c0" stroke-width="1"/>
+    <text class="sans sub" x="0" y="118">One adaptive iPhone app that stays coherent</text>
+    <text class="sans sub" x="0" y="142">in every pose — closed, folded, and open.</text>
+    <text class="serif callout" x="0" y="186">“Layout reacts to space. Interaction may react to the hinge.”</text>
+  </g>
+
+  <!-- device: the fold is the one focal element -->
+  <g transform="translate(1006 168)">
+    <path d="M-10 -116 L-168 -94 A12 12 0 0 0 -178 -82 L-178 82 A12 12 0 0 0 -168 94 L-10 116 Z" fill="#ffffff" stroke="#2d3142" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M10 -116 L168 -94 A12 12 0 0 1 178 -82 L178 82 A12 12 0 0 1 168 94 L10 116 Z" fill="#ececec" stroke="#2d3142" stroke-width="1.5" stroke-linejoin="round"/>
+
+    <!-- vertical bar, outer display -->
+    <rect x="-166" y="-80" width="16" height="160" rx="6" fill="#2d3142" opacity="0.06"/>
+    <circle cx="-158" cy="-58" r="3.4" fill="#4f5d75"/>
+    <circle cx="-158" cy="-44" r="3.4" fill="#7a8399"/>
+    <circle cx="-158" cy="-30" r="3.4" fill="#7a8399"/>
+    <rect x="-168" y="-90" width="20" height="8" rx="4" fill="#2d3142"/>
+    <g fill="#4f5d75" opacity="0.22">
+      <rect x="-140" y="-62" width="100" height="11" rx="5.5"/><rect x="-140" y="-42" width="78" height="11" rx="5.5"/>
+      <rect x="-140" y="-22" width="92" height="11" rx="5.5"/><rect x="-140" y="-2" width="64" height="11" rx="5.5"/>
+    </g>
+    <!-- even grid, inner display -->
+    <g fill="#4f5d75" opacity="0.18">
+      <rect x="34" y="-72" width="62" height="44" rx="6"/><rect x="104" y="-72" width="62" height="44" rx="6"/>
+      <rect x="34" y="-20" width="62" height="44" rx="6"/><rect x="104" y="-20" width="62" height="44" rx="6"/>
+      <rect x="34" y="32" width="62" height="44" rx="6"/><rect x="104" y="32" width="62" height="44" rx="6"/>
+    </g>
+    <!-- THE FOLD — the single accent -->
+    <rect x="-6" y="-116" width="12" height="232" fill="rgba(235,108,54,0.08)"/>
+    <line x1="-6" y1="-116" x2="-6" y2="116" stroke="#eb6c36" stroke-width="1.6"/>
+    <line x1="6" y1="-116" x2="6" y2="116" stroke="#eb6c36" stroke-width="1.6"/>
+    <text style="fill:#eb6c36" class="mono" x="0" y="140" text-anchor="middle" font-size="8" letter-spacing=".18em">FOLDING REGION</text>
+  </g>
+
+  <g class="mono" font-size="9" letter-spacing=".14em" fill="#7a8399" transform="translate(76 310)">
+    <text x="0" y="0">SWIFTUI + UIKIT</text>
+    <text x="180" y="0">iOS 27.1 SDK</text>
+    <text x="330" y="0">59 APPLE SYMBOLS TRACKED</text>
+    <text x="580" y="0">VERIFIED IN CI</text>
+  </g>
+</svg>

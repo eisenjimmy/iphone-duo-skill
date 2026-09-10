@@ -1,0 +1,35 @@
+name: The skill made an agent do the wrong thing
+description: You ran it and the result was wrong
+title: "[Output] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "The skill is a prompt. If an agent did something wrong, the prompt is usually the bug."
+  - type: input
+    id: harness
+    attributes:
+      label: Agent and model
+      placeholder: "Claude Code, Opus"
+    validations: { required: true }
+  - type: textarea
+    id: prompt
+    attributes:
+      label: What you asked
+    validations: { required: true }
+  - type: textarea
+    id: got
+    attributes:
+      label: What it did
+      description: The code or plan it produced.
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should have done
+    validations: { required: true }
+  - type: input
+    id: rule
+    attributes:
+      label: Which rule failed, if you can tell
+      placeholder: "SKILL.md invariant 2"

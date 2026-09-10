@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 58" width="1180" height="58" role="img" aria-label="MIT licensed, 59 Apple symbols tracked, 34 doc-verified in CI, targets iOS 27.1, Agent Skills format, researched 2026-09-10">
+  <style>
+    .sans{font-family:'Geist',ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    .mono{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace}
+    .k{font-size:7.5px;font-weight:500;letter-spacing:.18em;fill:#7a8399}
+    .v{font-size:13px;font-weight:600;fill:#2d3142}
+  </style>
+  <rect width="1180" height="58" rx="6" fill="#ececec"/>
+  <g><text class="mono k" x="28" y="24">LICENSE</text><text class="sans v" x="28" y="43">MIT</text></g>
+  <line x1="120" y1="16" x2="120" y2="42" stroke="#bfc0c0"/>
+  <g><text class="mono k" x="148" y="24">APPLE SYMBOLS TRACKED</text><text class="sans v" x="148" y="43">59</text></g>
+  <line x1="330" y1="16" x2="330" y2="42" stroke="#bfc0c0"/>
+  <g><text class="mono k" x="358" y="24">DOC-VERIFIED IN CI</text><text style="fill:#eb6c36" class="sans v" x="358" y="43">34</text></g>
+  <line x1="518" y1="16" x2="518" y2="42" stroke="#bfc0c0"/>
+  <g><text class="mono k" x="546" y="24">TARGET</text><text class="sans v" x="546" y="43">iOS 27.1 · Xcode 27.1</text></g>
+  <line x1="768" y1="16" x2="768" y2="42" stroke="#bfc0c0"/>
+  <g><text class="mono k" x="796" y="24">FORMAT</text><text class="sans v" x="796" y="43">Agent Skills</text></g>
+  <line x1="946" y1="16" x2="946" y2="42" stroke="#bfc0c0"/>
+  <g><text class="mono k" x="974" y="24">RESEARCHED</text><text class="sans v" x="974" y="43">2026-09-10</text></g>
+</svg>

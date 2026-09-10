@@ -13,11 +13,35 @@ For most camera apps, start with the **virtual front camera** rather than hardco
 
 ## Default recommendation: virtual front camera
 
-If the product only needs “the front camera facing the user,” prefer discovery using ordinary front-camera semantics and allow the system's virtual front camera to manage the physical transition.
+If the product only needs "the front camera facing the user," use **ordinary front-camera
+discovery** and let the system's virtual front camera manage the physical transition. There
+is no separate "virtual front camera" symbol — ordinary front discovery *is* the mechanism:
 
-This produces simpler behavior and avoids unnecessary camera-session churn.
+```swift
+let session = AVCaptureDevice.DiscoverySession(
+    deviceTypes: [.builtInWideAngleCamera],
+    mediaType: .video,
+    position: .front)
+let camera = session.devices.first
+```
+
+The system switches to the **inner** physical camera when the device is open and the
+**outer** one when it is closed. This avoids unnecessary session churn.
+
+The virtual device exposes only the **intersection** of both cameras' capabilities —
+**1080p at 60fps** — and **depth is available only on the individual cameras**. Reach for
+explicit physical selection only when you need what the intersection excludes.
 
 Use explicit physical camera selection only when the app needs features unavailable through the virtual camera or requires direct control over the inner/outer camera.
+
+> **`.builtInDualWideCamera` is a rear camera**, not a front one. It belongs in the
+> `deviceTypes:` list because the coordinator reports the direction of *every* monitored
+> camera relative to your view: on the outer display the rear cameras are backward-facing,
+> and opening the device changes that. Do not read its presence as "a Duo front camera."
+
+> **False friend: `builtInDuoCamera`.** This symbol is real and will autocomplete — it is a
+> **deprecated iOS 10 alias for `builtInDualCamera`** and has nothing whatsoever to do with
+> iPhone Duo. Never adopt it. An agent grepping the SDK for "Duo" will find it first.
 
 ## Capability differences
 
@@ -47,7 +71,7 @@ directionCoordinator = AVCaptureDeviceDirectionCoordinator(
     deviceTypes: [
         .builtInOuterUltraWideCamera,
         .builtInInnerUltraWideCamera,
-        .builtInDualWideCamera,
+        .builtInDualWideCamera,   // REAR virtual device — see note below
     ],
     changeHandler: { [weak self] map in
         self?.handleDirectionChange(map)
@@ -90,7 +114,7 @@ Avoid blocking the main actor while restarting capture.
 
 ## Direction-change handling
 
-When device posture changes and a different camera should become forward-facing:
+When the device pose changes and a different camera should become forward-facing:
 
 1. receive the direction update;
 2. identify the desired device descriptor;
@@ -128,17 +152,35 @@ Avoid hardcoded preview frames based on screen dimensions.
 
 ## Dynamic aspect ratio
 
-Apple documents a dynamic aspect-ratio capability on relevant cameras. When available, use the camera's supported dynamic aspect ratio to choose a landscape-friendly preview/capture presentation rather than cropping from a guessed fixed ratio.
+`AVCaptureDevice.dynamicAspectRatio` is documented and shipping (iOS 26.0). When available, use the camera's supported dynamic aspect ratio to choose a landscape-friendly preview/capture presentation rather than cropping from a guessed fixed ratio.
 
 Always verify the current camera supports the requested behavior.
 
 ## Rotation
 
-Adopt `AVCaptureDeviceRotationCoordinator` to keep the preview and captured media upright as the app moves between display contexts.
+Adopt **`AVCaptureDevice.RotationCoordinator`** (verified, iOS 17.0) to keep the preview and
+captured media upright as the app moves between displays.
 
-Apple's Duo camera guidance also advises disabling camera sensor orientation compensation after adopting the rotation coordinator where the relevant output/API supports doing so, for better performance.
+> **Swift spelling matters.** `AVCaptureDeviceRotationCoordinator` is the **Objective-C**
+> name and does not compile in Swift. Use the nested Swift type
+> `AVCaptureDevice.RotationCoordinator`, `init(device:previewLayer:)`, with
+> `videoRotationAngleForHorizonLevelCapture` / `...ForHorizonLevelPreview`.
 
-Agents must verify exact property availability before applying this optimization.
+Once it is adopted, **disable sensor orientation compensation** for better performance —
+it is enabled by default on every iPhone Duo front camera. Both properties are verified
+and shipping today:
+
+```swift
+photoOutput.isCameraSensorOrientationCompensationSupported   // check first
+photoOutput.isCameraSensorOrientationCompensationEnabled = false
+```
+
+## Activating the camera changes your own layout
+
+The inner front-camera reserved region **only exists while the camera is active**. Starting
+a capture session materially changes your own safe geometry — the UI moves aside to reveal
+the camera. Re-read `reservedRegions(kind: .occlusion)` after the session starts; do not
+cache a layout computed before it.
 
 ## Both displays at once
 
@@ -206,4 +248,4 @@ Accessory content should be intentionally designed for its audience.
 
 ## Acceptance criteria
 
-Camera support passes when ordinary front-camera use prefers system virtualization, explicit camera control uses direction coordination correctly, session state remains valid while posture changes, preview layout adapts without screen assumptions, and all second-display camera UI is supplementary and availability-aware.
+Camera support passes when ordinary front-camera use prefers system virtualization, explicit camera control uses direction coordination correctly, session state remains valid while the pose changes, preview layout adapts without screen assumptions, and all second-display camera UI is supplementary and availability-aware.

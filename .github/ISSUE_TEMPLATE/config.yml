@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Apple's iPhone Duo documentation
+    url: https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo
+    about: Apple's guidance is always the authority. Check it before filing.

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 352" width="1180" height="352" role="img" aria-label="Three tiers: universal adaptive foundation, Duo-aware presentation, Duo-exclusive capability">
+  <style>
+    .sans{font-family:'Geist',ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    .mono{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace}
+    .serif{font-family:'Instrument Serif',ui-serif,Georgia,serif}
+    .eyebrow{font-size:8px;font-weight:500;letter-spacing:.18em;fill:#7a8399}
+    .n{font-size:30px;fill:#bfc0c0}
+    .name{font-size:15px;font-weight:600;fill:#2d3142}
+    .body{font-size:11.5px;fill:#4f5d75}
+    .gate{font-size:8px;font-weight:500;letter-spacing:.16em}
+    .callout{font-size:14px;font-style:italic;fill:#4f5d75}
+  </style>
+  <rect width="1180" height="352" fill="#f5f5f5"/>
+  <text class="mono eyebrow" x="36" y="34">THREE TIERS · EARN EACH ONE BEFORE THE NEXT</text>
+  <line x1="36" y1="46" x2="1144" y2="46" stroke="#bfc0c0"/>
+
+  <!-- TIER 1 — the focal tier: this is where the work actually is -->
+  <g transform="translate(36 66)">
+    <rect width="1108" height="76" rx="8" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+    <text style="fill:#eb6c36" class="serif n" x="26" y="48">1</text>
+    <text class="sans name" x="66" y="30">Universal adaptive foundation</text>
+    <text class="sans body" x="66" y="50">Size classes · container-relative layout · NavigationSplitView · adaptive grids · safe areas · state continuity</text>
+    <text style="fill:#eb6c36" class="mono" x="66" y="66" font-size="9">Needs no Duo API. Improves every device you already ship to.</text>
+    <text style="fill:#eb6c36" class="mono gate" x="1084" y="43" text-anchor="end">START HERE</text>
+  </g>
+
+  <!-- TIER 2 -->
+  <g transform="translate(36 156)">
+    <rect width="1108" height="76" rx="8" fill="#ececec"/>
+    <text class="serif n" x="26" y="48">2</text>
+    <text class="sans name" x="66" y="30">Duo-aware presentation</text>
+    <text class="sans body" x="66" y="50">Reserved regions · displacement around the fold · ArrangementView · vertical bar tuning · overflow priority</text>
+    <text style="fill:#7a8399" class="mono" x="66" y="66" font-size="9">Needs the iOS 27.1 SDK. Still reacts to space — never to device identity.</text>
+    <text style="fill:#7a8399" class="mono gate" x="1084" y="43" text-anchor="end">AFTER TIER 1</text>
+  </g>
+
+  <!-- TIER 3 -->
+  <g transform="translate(36 246)">
+    <rect width="1108" height="76" rx="8" fill="#ececec"/>
+    <text class="serif n" x="26" y="48">3</text>
+    <text class="sans name" x="66" y="30">Duo-exclusive capability</text>
+    <text class="sans body" x="66" y="50">onHingeChange · multiple scenes · scene accessories · CameraCaptureAccessory · camera direction coordination</text>
+    <text style="fill:#7a8399" class="mono" x="66" y="66" font-size="9">Hardware-gated and always optional. The app stays whole when the capability is absent.</text>
+    <text style="fill:#7a8399" class="mono gate" x="1084" y="43" text-anchor="end">ONLY IF IT EARNS IT</text>
+  </g>
+</svg>

@@ -1,0 +1,44 @@
+name: Apple API change
+description: A symbol was renamed, removed, or is now documented
+title: "[API] "
+labels: ["api-change", "priority"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable issue type in the repository. Thank you.
+        If `verify-manifest.sh` already fails for you, pasting its output is a complete report.
+  - type: input
+    id: symbol
+    attributes:
+      label: Symbol
+      placeholder: "SwiftUI.ArrangementView"
+    validations: { required: true }
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened
+      options:
+        - Now documented (should become `verified`)
+        - Renamed
+        - Removed or never shipped
+        - Signature changed
+        - Availability changed
+        - The skill spells it wrong
+    validations: { required: true }
+  - type: input
+    id: source
+    attributes:
+      label: Apple URL
+      placeholder: "https://developer.apple.com/documentation/..."
+    validations: { required: true }
+  - type: input
+    id: sdk
+    attributes:
+      label: SDK you verified against
+      placeholder: "Xcode 27.1 beta 2 / iOS 27.1"
+  - type: textarea
+    id: detail
+    attributes:
+      label: Details
+      description: Paste `verify-manifest.sh` output if you have it.

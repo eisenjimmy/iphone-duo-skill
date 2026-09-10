@@ -138,7 +138,7 @@ Primary camera source for:
 - mirroring;
 - `AVCaptureVideoPreviewLayer.videoGravity`;
 - dynamic aspect ratio;
-- `AVCaptureDeviceRotationCoordinator`;
+- `AVCaptureDevice.RotationCoordinator` (Swift; the `AVCaptureDeviceRotationCoordinator` spelling is Objective-C only);
 - camera sensor orientation compensation guidance;
 - using both displays with scene accessories.
 

@@ -1,0 +1,984 @@
+{
+  "$schema": "./api-manifest.schema.json",
+  "manifestVersion": "2.2.0",
+  "researchDate": "2026-09-10",
+  "staleAfterDays": 45,
+  "note": "Single source of truth for every Apple symbol this skill names. `status` is the ONLY authority on whether a symbol is real. Prose references must not assert existence of a symbol that is not listed here. CI re-resolves every `docUrl` and flags drift.",
+  "statusLegend": {
+    "verified": "A DocC reference page resolved at researchDate. Availability is quoted from Apple.",
+    "apple-sourced": "Spelling comes verbatim from an Apple code sample or Apple chapter text, but no DocC page exists yet (iOS 27.1 SDK and its docs had not shipped). Treat the name as real, the signature as provisional.",
+    "conflicted": "Apple's own materials disagree on the spelling. Do not emit without checking the SDK."
+  },
+  "sdkTimeline": {
+    "runsUnrecompiled": "Apps run on iPhone Duo with no rebuild.",
+    "iOS27SDK": "Extends the app left of the status bar on the inner display.",
+    "iOS27_1SDK": "Reaches the screen edge and lays standard navigation/toolbar buttons out vertically. Required for ReservedRegion, arrangements, hinge, and vertical-bar tuning.",
+    "toolchain": "Xcode 27.1",
+    "simulator": "iPhone Duo simulator via DeviceHub; on-screen controls open, close, rotate and fold the device.",
+    "source": "https://developer.apple.com/videos/play/tech-talks/111461/"
+  },
+  "symbols": [
+    {
+      "id": "swiftui.toolbarItemVisibilityPriority",
+      "name": "ToolbarItemVisibilityPriority",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, tvOS 27.0, visionOS 27.0, watchOS 27.0, macOS 26.1",
+      "duoExclusive": false,
+      "declaration": "struct ToolbarItemVisibilityPriority",
+      "members": [
+        ".automatic",
+        ".high",
+        ".low",
+        "init(higherThan:)",
+        "init(lowerThan:)"
+      ],
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbaritemvisibilitypriority",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarContent.visibilityPriority",
+      "name": "ToolbarContent.visibilityPriority(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0 (macOS 26.1)",
+      "duoExclusive": false,
+      "declaration": "@MainActor @preconcurrency func visibilityPriority(_ priority: ToolbarItemVisibilityPriority) -> some ToolbarContent",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbarcontent/visibilitypriority(_:)",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarOverflowMenu",
+      "name": "ToolbarOverflowMenu",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, visionOS 27.0",
+      "duoExclusive": false,
+      "declaration": "nonisolated struct ToolbarOverflowMenu<Content> where Content : View",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbaroverflowmenu",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.toolbarOverflowMenu",
+      "name": "View.toolbarOverflowMenu(content:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "declaration": "nonisolated func toolbarOverflowMenu<C>(@ContentBuilder content: () -> C) -> some View where C : View",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/toolbaroverflowmenu(content:)",
+      "usedIn": [
+        "02-bars-and-navigation.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.sceneAccessory",
+      "name": "View.sceneAccessory(content:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0",
+      "duoExclusive": false,
+      "declaration": "nonisolated func sceneAccessory<C>(@ContentBuilder content: () -> C) -> some View where C : SceneAccessoryContent",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/sceneaccessory(content:)",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.sceneAccessoryContent",
+      "name": "SceneAccessoryContent",
+      "framework": "SwiftUI",
+      "kind": "protocol",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0",
+      "duoExclusive": false,
+      "declaration": "@MainActor protocol SceneAccessoryContent",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/sceneaccessorycontent",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "swiftui.sceneAccessoryContent.onAvailabilityChange",
+      "name": "SceneAccessoryContent.onAvailabilityChange(perform:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0",
+      "duoExclusive": false,
+      "declaration": "nonisolated func onAvailabilityChange(perform action: @escaping (Bool) -> Void) -> some SceneAccessoryContent",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/sceneaccessorycontent/onavailabilitychange(perform:)",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarItemPlacement.topBarPinnedTrailing",
+      "name": "ToolbarItemPlacement.topBarPinnedTrailing",
+      "framework": "SwiftUI",
+      "kind": "property",
+      "status": "verified",
+      "availability": "resolved at researchDate",
+      "duoExclusive": false,
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbaritemplacement/topbarpinnedtrailing",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.defaultTabBarPlacement",
+      "name": "View.defaultTabBarPlacement(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "resolved at researchDate",
+      "duoExclusive": false,
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/defaulttabbarplacement(_:)",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.concentricRectangle",
+      "name": "ConcentricRectangle",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 26",
+      "duoExclusive": false,
+      "docUrl": "https://developer.apple.com/documentation/swiftui/concentricrectangle",
+      "usedIn": [
+        "01-design-and-layout.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiBarButtonItemVisibilityPriority",
+      "name": "UIBarButtonItemVisibilityPriority",
+      "framework": "UIKit",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, tvOS 27.0, visionOS 27.0",
+      "duoExclusive": false,
+      "declaration": "struct UIBarButtonItemVisibilityPriority",
+      "members": [
+        ".high",
+        ".low",
+        ".standard",
+        "init(_:)",
+        "init(higherThan:)",
+        "init(lowerThan:)",
+        "init(rawValue:)"
+      ],
+      "docUrl": "https://developer.apple.com/documentation/uikit/uibarbuttonitemvisibilitypriority",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiBarButtonItem.visibilityPriority",
+      "name": "UIBarButtonItem.visibilityPriority",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "declaration": "var visibilityPriority: UIBarButtonItemVisibilityPriority { get set }",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uibarbuttonitem/visibilitypriority",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiNavigationItem.additionalOverflowItems",
+      "name": "UINavigationItem.additionalOverflowItems",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 16.0, iPadOS 16.0, Mac Catalyst 16.0, visionOS 1.0",
+      "duoExclusive": false,
+      "declaration": "var additionalOverflowItems: UIDeferredMenuElement? { get set }",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uinavigationitem/additionaloverflowitems",
+      "note": "Pre-dates iPhone Duo by four releases. Do not present as a Duo API.",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiSceneAccessory",
+      "name": "UISceneAccessory",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0",
+      "duoExclusive": false,
+      "declaration": "@MainActor class UISceneAccessory",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uisceneaccessory",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "uikit.uiSceneAccessoryRegistration",
+      "name": "UISceneAccessoryRegistration",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "declaration": "@MainActor class UISceneAccessoryRegistration",
+      "members": [
+        "isAvailable",
+        "isEnabled"
+      ],
+      "docUrl": "https://developer.apple.com/documentation/uikit/uisceneaccessoryregistration",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "uikit.uiViewController.registerSceneAccessory",
+      "name": "UIViewController.registerSceneAccessory(_:)",
+      "framework": "UIKit",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "declaration": "func registerSceneAccessory(_ accessory: UISceneAccessory) -> UISceneAccessoryRegistration",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uiviewcontroller/registersceneaccessory(_:)",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "uikit.uiScene.connectionOptions.sceneAccessoryUserInfo",
+      "name": "UIScene.ConnectionOptions.sceneAccessoryUserInfo",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "declaration": "var sceneAccessoryUserInfo: Any?",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uiscene/connectionoptions",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.dynamicAspectRatio",
+      "name": "AVCaptureDevice.dynamicAspectRatio",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 26.0, iPadOS 26.0, Mac Catalyst 26.0",
+      "duoExclusive": false,
+      "declaration": "var dynamicAspectRatio: AVCaptureDevice.AspectRatio? { get }",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/dynamicaspectratio",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCapturePhotoOutput.sensorOrientationCompensation",
+      "name": "AVCapturePhotoOutput.isCameraSensorOrientationCompensationEnabled",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 26.0",
+      "duoExclusive": false,
+      "declaration": "var isCameraSensorOrientationCompensationEnabled: Bool { get set }",
+      "note": "Enabled on all iPhone Duo front cameras. Apple advises disabling it once AVCaptureDevice.RotationCoordinator is adopted, for performance.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturephotooutput/iscamerasensororientationcompensationenabled",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.rotationCoordinator",
+      "name": "AVCaptureDevice.RotationCoordinator",
+      "framework": "AVFoundation",
+      "kind": "class",
+      "status": "verified",
+      "availability": "iOS 17.0",
+      "duoExclusive": false,
+      "declaration": "class RotationCoordinator",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/rotationcoordinator",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ],
+      "note": "Swift spelling is the NESTED type AVCaptureDevice.RotationCoordinator. The flat name AVCaptureDeviceRotationCoordinator is Objective-C only and does not compile in Swift.",
+      "members": [
+        "init(device:previewLayer:)",
+        "videoRotationAngleForHorizonLevelCapture",
+        "videoRotationAngleForHorizonLevelPreview"
+      ]
+    },
+    {
+      "id": "swiftui.reservedRegion",
+      "name": "ReservedRegion",
+      "framework": "SwiftUI",
+      "kind": "type",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleQuote": "New in iOS 27.1, ReservedRegion in SwiftUI and UIViewReservedRegion in UIKit let custom UI claim as much screen space as possible without colliding with system UI.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111461/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.geometryProxy.reservedRegions",
+      "name": "GeometryProxy.reservedRegions(kind:options:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "GeometryReader { proxy in\n  let regions = proxy.reservedRegions(kind: .division, options: .includeInactive)\n  let frames = regions.map(\\.frame)\n}",
+      "members": [
+        ".division",
+        ".occlusion",
+        ".includeInactive",
+        "region.frame"
+      ],
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111463/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiView.reservedRegions",
+      "name": "UIView.reservedRegions(kind:)",
+      "framework": "UIKit",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "let regions = view.reservedRegions(kind: .division)\nlet frames = regions.map(\\.frame)",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111463/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiViewReservedRegion",
+      "name": "UIViewReservedRegion",
+      "framework": "UIKit",
+      "kind": "type",
+      "status": "conflicted",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "conflict": "Talk 111461 chapter text names the type `UIViewReservedRegion`; talk 111463's code sample only ever calls `view.reservedRegions(kind:)` and never names the type. The type spelling is unconfirmed \u2014 prefer the method call, which is attested in a code sample.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111461/",
+      "usedIn": [
+        "03-fold-arrangements.md"
+      ]
+    },
+    {
+      "id": "swiftui.arrangementView",
+      "name": "ArrangementView",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "ArrangementView {\n  PlayerView()\n} secondary: {\n  UpNextView()\n}\n.arrangementViewStyle(.split.axes(.horizontal))",
+      "members": [
+        ".arrangementViewStyle(_:)",
+        ".split",
+        ".split.axes(_:)",
+        ".overlay"
+      ],
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111463/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.overlayArrangementZIndex",
+      "name": "EnvironmentValues.overlayArrangementZIndex",
+      "framework": "SwiftUI",
+      "kind": "environment value",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "@Environment(\\.overlayArrangementZIndex) private var zIndex: Int",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111463/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiArrangementViewController",
+      "name": "UIArrangementViewController",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "let arrangementVC = UIArrangementViewController()\narrangementVC.setViewController(playerVC, for: .primary)\narrangementVC.setViewController(upNextVC, for: .secondary)\narrangementVC.updateArrangement(.split.axes(.horizontal))\nlet primaryState = arrangementVC.state(for: .primary)",
+      "members": [
+        "setViewController(_:for:)",
+        "updateArrangement(_:)",
+        "state(for:)",
+        "state.zIndex",
+        ".primary",
+        ".secondary"
+      ],
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111463/",
+      "usedIn": [
+        "03-fold-arrangements.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.onHingeChange",
+      "name": "View.onHingeChange(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": ".onHingeChange { _, context in\n  if let hinge = context.hinge, hinge.status == .partiallyOpen {\n    pitchBend = calculatePitchBend(angle: hinge.angle)\n  } else {\n    pitchBend = 0\n  }\n}",
+      "members": [
+        "context.hinge",
+        "hinge.status",
+        ".closed",
+        ".partiallyOpen",
+        ".fullyOpen",
+        "hinge.angle: Angle"
+      ],
+      "note": "A nil hinge means the device has no hinge. Always unwrap.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111464/",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiHingeInteraction",
+      "name": "UIHingeInteraction",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "note": "UIKit counterpart to onHingeChange. Named in talk 111464 chapter text; no code sample shown.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111464/",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "swiftui.cameraCaptureAccessory",
+      "name": "CameraCaptureAccessory",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": ".sceneAccessory {\n  CameraCaptureAccessory(isEnabled: $model.isEnabled) {\n    TeleprompterView(model: model)\n  }\n  .onAvailabilityChange { newValue in model.isAvailable = newValue }\n}",
+      "note": "Available only while the app is full screen on the inner display with an active camera session. Register it on the same view as the camera UI. NOTE: absent from SceneAccessoryContent's published conforming-types list; ExternalNonInteractiveAccessory is the verified baseline. Treat CameraCaptureAccessory as 27.1 talk-sourced.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111464/",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md",
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarContent.axisBehavior",
+      "name": "ToolbarContent.axisBehavior(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "ToolbarItem { ProfileView() }\n  .axisBehavior(.verticalPreferred)",
+      "members": [
+        ".verticalPreferred",
+        ".horizontalOnly"
+      ],
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiBarButtonItem.axisBehavior",
+      "name": "UIBarButtonItem.axisBehavior",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "item.axisBehavior = .verticalPreferred",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarVerticalEdge",
+      "name": "EnvironmentValues.toolbarVerticalEdge",
+      "framework": "SwiftUI",
+      "kind": "environment value",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "@Environment(\\.toolbarVerticalEdge) var edge",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiTraitCollection.verticalBarEdge",
+      "name": "UITraitCollection.verticalBarEdge",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "switch traitCollection.verticalBarEdge { ... }",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.toolbarVerticalCompressionBehavior",
+      "name": "View.toolbarVerticalCompressionBehavior(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": ".toolbarVerticalCompressionBehavior(.prefersToolbarItems)",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiNavigationItem.verticalBarCompressionBehavior",
+      "name": "UINavigationItem.verticalBarCompressionBehavior",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "navigationItem.verticalBarCompressionBehavior = .prefersBarItems",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.toolbarVerticalBehavior",
+      "name": "View.toolbarVerticalBehavior(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": ".toolbarVerticalBehavior(.disabled)",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiViewController.preferredVerticalBarBehavior",
+      "name": "UIViewController.preferredVerticalBarBehavior",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "override var preferredVerticalBarBehavior: UIVerticalBarBehavior { .disabled }",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiBarButtonItem.badge",
+      "name": "UIBarButtonItem.badge",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 26 (badge API); shown for Duo vertical bars",
+      "duoExclusive": false,
+      "appleSample": "item.badge = .count(7)",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111462/",
+      "usedIn": [
+        "02-bars-and-navigation.md"
+      ]
+    },
+    {
+      "id": "uikit.uiNavigationItem.leftItemsSupplementBackButton",
+      "name": "UINavigationItem.leftItemsSupplementBackButton",
+      "framework": "UIKit",
+      "kind": "property",
+      "status": "conflicted",
+      "availability": "pre-existing",
+      "duoExclusive": false,
+      "conflict": "Talk 111462 chapter text writes `leftItemSupplementsBackButton`; its own code sample and the shipping documentation use `leftItemsSupplementBackButton`. The code sample is correct.",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uinavigationitem/leftitemssupplementbackbutton",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avkit.avCaptureDeviceDirectionCoordinator",
+      "name": "AVCaptureDeviceDirectionCoordinator",
+      "framework": "AVKit",
+      "kind": "class",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "appleSample": "AVCaptureDeviceDirectionCoordinator(\n  view: view,\n  deviceTypes: [.builtInOuterUltraWideCamera, .builtInInnerUltraWideCamera, .builtInDualWideCamera],\n  changeHandler: { [weak self] map in self?.updateCameraSession(map) }\n)",
+      "note": "Lives in AVKit, not AVFoundation. View-tied, therefore main-actor isolated \u2014 do not call AVFoundation from the handler; pass the vended AVCaptureDeviceDescriptor to your camera actor. Positions are reported RELATIVE TO THAT VIEW.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111465/",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDeviceDescriptor",
+      "name": "AVCaptureDeviceDescriptor",
+      "framework": "AVFoundation",
+      "kind": "type",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "note": "Main-actor-safe, Sendable representation of a capture device. The actor-boundary crossing type for direction changes.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111465/",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avfoundation.deviceType.builtInOuterUltraWideCamera",
+      "name": "AVCaptureDevice.DeviceType.builtInOuterUltraWideCamera",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "note": "Outer front camera: up to 4K and 120fps.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111465/",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    },
+    {
+      "id": "avfoundation.deviceType.builtInInnerUltraWideCamera",
+      "name": "AVCaptureDevice.DeviceType.builtInInnerUltraWideCamera",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "apple-sourced",
+      "availability": "iOS 27.1",
+      "duoExclusive": true,
+      "note": "Inner under-display front camera: 1080p up to 60fps. First under-display camera on iPhone.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111465/",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    },
+    {
+      "id": "uikit.uiWindowSceneActivation",
+      "name": "UIWindowSceneActivation",
+      "framework": "UIKit",
+      "kind": "action",
+      "status": "apple-sourced",
+      "availability": "pre-existing; Duo-relevant behavior",
+      "duoExclusive": false,
+      "note": "Hides itself automatically when new windows cannot be created. New windows cannot be created on the outer display \u2014 that display is reserved for the inner display's scene.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111464/",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md"
+      ]
+    },
+    {
+      "id": "swiftui.externalNonInteractiveAccessory",
+      "name": "ExternalNonInteractiveAccessory",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 27.0, iPadOS 27.0",
+      "duoExclusive": false,
+      "note": "A documented conforming type of SceneAccessoryContent, taking isEnabled: plus a content closure. This is the VERIFIED baseline accessory; CameraCaptureAccessory is the 27.1 camera-specific variant that is only talk-sourced. Published conforming types of SceneAccessoryContent are exactly: EmptyView, ExternalNonInteractiveAccessory, ForEach, Group, TupleContent.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/externalnoninteractiveaccessory",
+      "usedIn": [
+        "04-hardware-scenes-hinge.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.toolbarMinimizationBehavior",
+      "name": "View.toolbarMinimizationBehavior(_:for:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 27.0",
+      "duoExclusive": false,
+      "note": "VERIFIED and semantically adjacent to Duo bar compression. An agent that cannot resolve toolbarVerticalCompressionBehavior (27.1) will reach for this. They are NOT the same API \u2014 do not substitute silently.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/toolbarminimizationbehavior(_:for:)",
+      "usedIn": [
+        "02-bars-and-navigation.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.tabBarMinimizeBehavior",
+      "name": "View.tabBarMinimizeBehavior(_:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 26.0",
+      "duoExclusive": false,
+      "note": "The existing minimized-tab-bar behavior the HIG points at for task-oriented apps that want to preserve toolbar actions over the tab bar.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/tabbarminimizebehavior(_:)",
+      "usedIn": [
+        "02-bars-and-navigation.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.deviceType.builtInDuoCamera",
+      "name": "AVCaptureDevice.DeviceType.builtInDuoCamera",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 10.0, DEPRECATED",
+      "duoExclusive": false,
+      "falseFriend": true,
+      "note": "FALSE FRIEND. Despite the name this has NOTHING to do with iPhone Duo \u2014 it is a deprecated iOS 10 alias for builtInDualCamera (a rear camera). An agent grepping the SDK for 'Duo' finds this first. Never adopt it.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/devicetype-swift.struct/builtinduocamera",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.deviceType.builtInDualWideCamera",
+      "name": "AVCaptureDevice.DeviceType.builtInDualWideCamera",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 13.0",
+      "duoExclusive": false,
+      "note": "A REAR virtual device (ultrawide + wide). It appears in Apple's direction-coordinator sample because the coordinator reports direction for every monitored camera relative to your view \u2014 not because it is a front camera.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/devicetype-swift.struct/builtindualwidecamera",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.navigationSplitView",
+      "name": "NavigationSplitView",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 16.0",
+      "duoExclusive": false,
+      "note": "The adaptive list/detail container. On iPhone Duo it expands on the inner display and collapses to one pane on the outer, and adapts its column widths and margins to the fold automatically.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/navigationsplitview",
+      "usedIn": [
+        "01-design-and-layout.md",
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.tabView",
+      "name": "TabView",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 13.0",
+      "duoExclusive": false,
+      "note": "Pairs with defaultTabBarPlacement(.sidebar) for expansive inner-display presentation.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/tabview",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "06-testing-and-review.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarItemGroup",
+      "name": "ToolbarItemGroup",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 14.0",
+      "duoExclusive": false,
+      "note": "Groups space themselves and adapt as available space changes. Required on Duo because flexible spacers are zero-size on the vertical axis.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbaritemgroup",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.view.onGeometryChange",
+      "name": "View.onGeometryChange(for:of:action:)",
+      "framework": "SwiftUI",
+      "kind": "method",
+      "status": "verified",
+      "availability": "iOS 18.0",
+      "duoExclusive": false,
+      "note": "Observes container geometry without a GeometryReader. One of the two places reserved regions can be queried.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/view/ongeometrychange(for:of:action:)",
+      "usedIn": [
+        "01-design-and-layout.md",
+        "06-testing-and-review.md"
+      ]
+    },
+    {
+      "id": "uikit.uiBarButtonItemGroup",
+      "name": "UIBarButtonItemGroup",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "verified",
+      "availability": "iOS 16.0",
+      "duoExclusive": false,
+      "note": "UIKit counterpart to ToolbarItemGroup. Same rule: group rather than hand-space.",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uibarbuttonitemgroup",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "uikit.uiNavigationController",
+      "name": "UINavigationController",
+      "framework": "UIKit",
+      "kind": "class",
+      "status": "verified",
+      "availability": "iOS 2.0",
+      "duoExclusive": false,
+      "note": "Container-provided bars participate in the vertical bar region; a hand-rolled UIToolbar does not.",
+      "docUrl": "https://developer.apple.com/documentation/uikit/uinavigationcontroller",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureVideoPreviewLayer.videoGravity",
+      "name": "AVCaptureVideoPreviewLayer.videoGravity",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 4.0",
+      "duoExclusive": false,
+      "note": "Controls how the preview fills a container whose aspect ratio changes as the device folds.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer/videogravity",
+      "usedIn": [
+        "05-camera.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.position",
+      "name": "AVCaptureDevice.position",
+      "framework": "AVFoundation",
+      "kind": "property",
+      "status": "verified",
+      "availability": "iOS 4.0",
+      "duoExclusive": false,
+      "note": "Still only back/front. On iPhone Duo BOTH front cameras report .front, and the displays can face opposite directions - so .front no longer means 'facing the user'. Use the direction coordinator.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/position-swift.property",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    },
+    {
+      "id": "avfoundation.avCaptureDevice.position.front",
+      "name": "AVCaptureDevice.Position.front",
+      "framework": "AVFoundation",
+      "kind": "case",
+      "status": "verified",
+      "availability": "iOS 4.0",
+      "duoExclusive": false,
+      "note": "See AVCaptureDevice.position - ambiguous on a two-display device.",
+      "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/position-swift.enum/front",
+      "usedIn": [
+        "05-camera.md"
+      ]
+    }
+  ],
+  "deprecations": [
+    {
+      "symbol": "UIScreen.main",
+      "status": "will be deprecated",
+      "reason": "Ambiguous on a two-display device.",
+      "replacement": "window?.windowScene?.screen for the screen; traitCollection.displayScale for scale; scene bounds / GeometryReader for size.",
+      "sourceUrl": "https://developer.apple.com/videos/play/tech-talks/111461/"
+    }
+  ],
+  "hardware": {
+    "note": "Pixel dimensions are published; LOGICAL POINT SIZES AND NATIVE SCALE FACTOR ARE NOT PUBLISHED BY APPLE. Never hardcode either.",
+    "innerDisplay": {
+      "diagonalInches": 7.6,
+      "pixels": "1878x2670",
+      "ppi": 430,
+      "sizeClass": "regular in BOTH dimensions"
+    },
+    "outerDisplay": {
+      "diagonalInches": 5.4,
+      "pixels": "1398x2034",
+      "ppi": 460,
+      "sizeClass": "compact width"
+    },
+    "shared": [
+      "ProMotion up to 120Hz",
+      "Dynamic Island",
+      "Always-On",
+      "3000 nits peak outdoor"
+    ],
+    "sourceUrl": "https://www.apple.com/iphone-duo/specs/"
+  }
+}

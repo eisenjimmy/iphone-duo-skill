@@ -1,6 +1,6 @@
-# 03 — Fold, reserved regions, arrangements, and hinge
+# 03 — Fold, reserved regions, and arrangements
 
-Use this reference when content can intersect the physical fold or camera, when two related surfaces need reorganization, or when a product feature genuinely responds to hinge posture.
+Use this reference when content can intersect the physical fold or camera, when two related surfaces need reorganization, or when a product feature genuinely responds to the device pose.
 
 ## Distinguish three concepts
 
@@ -9,7 +9,7 @@ Do not conflate these APIs:
 ```text
 safe areas       → system UI / edge protection
 reserved regions → physical or system areas inside usable geometry
-hinge data       → live physical posture / interaction input
+hinge data       → live physical pose / interaction input
 ```
 
 Layout normally uses safe areas and reserved regions. Hinge state is primarily an interaction signal.
@@ -28,7 +28,7 @@ There are two useful semantic categories:
 
 A division region splits a larger usable area into smaller regions. The fold is represented this way.
 
-SwiftUI pattern documented by Apple:
+SwiftUI pattern from Apple's Tech Talk 111463:
 
 ```swift
 GeometryReader { proxy in
@@ -40,6 +40,14 @@ GeometryReader { proxy in
 Do not assume one permanent hinge rectangle. Query the current region.
 
 ### Occlusion regions
+
+The two camera regions are **not** equivalent, and the difference decides whether you can
+treat the region as static:
+
+- **Outer front camera — always present.** It expands into the Dynamic Island for Live
+  Activities and is vertically aligned with the side controls.
+- **Inner front camera — only while the camera is active.** Invisible otherwise; when a
+  capture session starts, the UI moves aside to reveal it.
 
 An occlusion region covers content without dividing the entire container. The camera is an example.
 
@@ -53,7 +61,7 @@ Use this for manually positioned focal content or controls that cannot be obscur
 
 ## Active versus inactive regions
 
-By default, queries return active regions. Apple also documents querying inactive regions:
+By default, queries return active regions. Apple's Tech Talk 111463 also shows querying inactive ones:
 
 ```swift
 proxy.reservedRegions(
@@ -113,15 +121,29 @@ Avoid changing the entire screen architecture merely because a region became act
 
 ## Choosing a destination
 
-When displacement is necessary, choose the destination based on task semantics and physical posture rather than arbitrary geometry.
+When displacement is necessary, choose the destination based on task semantics and physical pose rather than arbitrary geometry.
 
 Examples:
 
 - book-like partial fold: keep transient actions where users can continue tracking them as the device closes;
-- tabletop posture: viewing content may fit the upper region while interactive controls belong closer to the lower region;
+- tabletop pose: viewing content may fit the upper region while interactive controls belong closer to the lower region;
 - two equally valid regions: preserve spatial continuity with the control's previous location.
 
 Minimize movement distance and surprise.
+
+## Which arrangement? Read your existing layout
+
+The HIG gives the most actionable refactoring heuristic in the whole guide:
+
+| You already have | Use |
+|---|---|
+| `HStack` — two views side by side | **split** |
+| `VStack` — one above the other | **split** |
+| `ZStack` — one layered over another | **overlay** |
+
+A **split** arrangement divides its bounds: **horizontally when it is wider than tall,
+vertically when taller than wide**. Restrict that with `.axes(…)`. When it cannot split along
+a permitted axis it shows a single view.
 
 ## `ArrangementView`
 
@@ -173,6 +195,15 @@ Do not encode device-specific layout logic around the arrangement.
 
 ### Overlay arrangement
 
+**Primary sits on top.** The HIG: *"the primary view moves atop the secondary view."* So the
+foreground surface — the player, the control layer — is the **primary**, and the thing behind
+it is the secondary. Getting this backwards buries the surface you meant to feature.
+
+**An overlay stops overlaying when partly folded.** *"When the display is partially folded,
+the views move to occupy each side; otherwise the primary view moves atop the secondary."*
+Never design an overlay assuming it always overlays. You can also collapse the secondary view
+when it should not appear at all.
+
 Use overlay when one view is foreground/supplementary to another and partial obscuration is acceptable:
 
 ```swift
@@ -186,7 +217,7 @@ NavigationStack {
 }
 ```
 
-Apple documents `overlayArrangementZIndex` as an environment value that can help a child adapt its internal representation when it is in front versus behind:
+Apple's Tech Talk 111463 shows `overlayArrangementZIndex` as an environment value that lets a child adapt its internal representation when it is in front versus behind:
 
 ```swift
 @Environment(\.overlayArrangementZIndex) private var zIndex
@@ -214,84 +245,6 @@ Prefer ordinary adaptive layout when:
 - only one button needs fold avoidance;
 - a standard `NavigationSplitView` already expresses list/detail semantics;
 - the existing design is a scrolling page with independent sections.
-
-## Hinge API
-
-SwiftUI provides `onHingeChange` for live hinge context. Apple describes high-level status values including closed, partially open, and fully open, plus continuous angle updates.
-
-Pattern:
-
-```swift
-struct InstrumentView: View {
-    @State private var effectAmount = 0.0
-
-    var body: some View {
-        InstrumentSurface(effectAmount: effectAmount)
-            .onHingeChange { _, context in
-                if let hinge = context.hinge,
-                   hinge.status == .partiallyOpen {
-                    effectAmount = mapAngle(hinge.angle)
-                } else {
-                    effectAmount = 0
-                }
-            }
-    }
-}
-```
-
-Always handle `context.hinge == nil`, because the code may run on devices without a hinge.
-
-## Good hinge use cases
-
-Use hinge data when the **physical bend itself** is part of the product interaction:
-
-- musical pitch/modulation;
-- game steering or mechanical input;
-- tabletop controller effects;
-- camera posture behavior;
-- a physical-book effect whose state is directly tied to device motion;
-- a deliberate tactile animation synchronized with folding.
-
-## Bad hinge use cases
-
-Never write ordinary layout logic such as:
-
-```swift
-if hinge.angle.degrees > 120 {
-    showSidebar = true
-}
-```
-
-or:
-
-```swift
-columns = hinge.status == .fullyOpen ? 3 : 1
-```
-
-Use available space, size classes, arrangement rules, or reserved regions for those decisions.
-
-## Hinge-state lifecycle
-
-When a continuous hinge effect applies only while partially open:
-
-1. enter relevant posture;
-2. update interaction state continuously;
-3. clamp/normalize values if necessary;
-4. reset state when the posture ends;
-5. ensure no stale value remains after closing/opening fully;
-6. make the feature harmless on devices without a hinge.
-
-Do not persist transient hinge angle as long-lived application state unless the product explicitly requires it.
-
-## Performance
-
-Hinge callbacks can update frequently. Keep work lightweight:
-
-- map angles with pure math;
-- avoid network/database work;
-- avoid rebuilding unrelated view models;
-- throttle only when a genuinely expensive downstream effect requires it;
-- drive animations/effects from a compact state value.
 
 ## Audit checklist
 

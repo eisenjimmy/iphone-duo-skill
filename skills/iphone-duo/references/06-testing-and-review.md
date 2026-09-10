@@ -181,8 +181,8 @@ outer display — portrait
 outer display — landscape
 inner display — portrait-like/tall presentation where applicable
 inner display — landscape/full expansive
-partially folded — book-like
-partially folded — tabletop-like
+partially open — book-like
+partially open — tabletop-like
 fully open/flat
 closing transition
 opening transition

@@ -1,100 +1,115 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# iPhone Duo readiness — heuristic first-pass scan.
+#
+#   bash audit-duo.sh <project-root> [--json] [--quiet]
+#
+# Patterns come from data/patterns.json — the single source of truth. This
+# script owns NO pattern strings of its own; add patterns there.
+#
+# This is a grep. It finds candidates, not defects. Every hit needs a human or
+# an agent to decide whether the match actually controls layout. Exit code is
+# 0 unless a category marked `expectZeroInDuoReadyApp` has hits.
+set -uo pipefail
 
-ROOT="${1:-.}"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATTERNS="$(dirname "$HERE")/data/patterns.json"
+ROOT="${1:-}"; shift || true
+JSON=0; QUIET=0
+for a in "$@"; do case "$a" in --json) JSON=1;; --quiet) QUIET=1;; esac; done
 
-if [[ ! -d "$ROOT" ]]; then
-  echo "error: project root does not exist: $ROOT" >&2
-  exit 2
-fi
+[ -z "$ROOT" ] && { echo "usage: audit-duo.sh <project-root> [--json] [--quiet]"; exit 2; }
+[ -d "$ROOT" ] || { echo "not a directory: $ROOT"; exit 2; }
+[ -f "$PATTERNS" ] || { echo "missing $PATTERNS"; exit 2; }
+command -v python3 >/dev/null || { echo "python3 required"; exit 2; }
 
-if command -v rg >/dev/null 2>&1; then
-  SEARCH="rg"
-else
-  SEARCH="grep"
-fi
+python3 - "$ROOT" "$PATTERNS" "$JSON" "$QUIET" <<'PY'
+import json,sys,re,pathlib
 
-echo "iPhone Duo heuristic audit"
-echo "root: $ROOT"
-echo "search: $SEARCH"
-echo
+root,patterns_path,as_json,quiet = sys.argv[1],sys.argv[2],sys.argv[3]=="1",sys.argv[4]=="1"
+cfg=json.load(open(patterns_path))
 
-echo "This scan reports candidates, not confirmed defects."
-echo "Review every match in context before changing code."
-echo
+EXT={".swift",".m",".mm",".h"}
+SKIP={".build","DerivedData","Pods","Carthage","node_modules",".git","vendor",".swiftpm"}
+files=[p for p in pathlib.Path(root).rglob("*")
+       if p.suffix in EXT and not any(s in p.parts for s in SKIP)]
 
-run_rg() {
-  local title="$1"
-  local pattern="$2"
-  echo "== $title =="
-  rg -n --glob '*.swift' \
-    --glob '!**/.build/**' \
-    --glob '!**/DerivedData/**' \
-    --glob '!**/Pods/**' \
-    --glob '!**/Carthage/**' \
-    --glob '!**/SourcePackages/**' \
-    "$pattern" "$ROOT" || true
-  echo
-}
+if not files:
+    print(f"No Swift/ObjC sources found under {root}"); sys.exit(2)
 
-run_grep() {
-  local title="$1"
-  local pattern="$2"
-  echo "== $title =="
-  find "$ROOT" \
-    -type d \( -name .build -o -name DerivedData -o -name Pods -o -name Carthage -o -name SourcePackages \) -prune -o \
-    -type f -name '*.swift' -print0 \
-    | xargs -0 grep -nE "$pattern" 2>/dev/null || true
-  echo
-}
+results=[]; swift_files=sum(1 for f in files if f.suffix==".swift")
 
-scan() {
-  if [[ "$SEARCH" == "rg" ]]; then
-    run_rg "$1" "$2"
-  else
-    run_grep "$1" "$2"
-  fi
-}
+# Read and pre-filter each file ONCE, not once per category.
+docs=[]
+for f in files:
+    try: text=f.read_text(errors="replace")
+    except Exception: continue
+    lines=[]; in_block=False
+    for n,line in enumerate(text.splitlines(),1):
+        st=line.strip()
+        if in_block:
+            if "*/" in st: in_block=False
+            continue
+        if st.startswith("/*"):
+            if "*/" not in st: in_block=True
+            continue
+        if st.startswith("//"): continue
+        lines.append((n,line,st))
+    docs.append((str(f.relative_to(root)),lines))
 
-scan "P1 candidate: global screen assumptions" \
-  'UIScreen\.main|UIScreen\.main\.bounds|main\.bounds'
+for cat in cfg["categories"]:
+    rx=re.compile("|".join(f"(?:{p})" for p in cat["patterns"]))
+    hits=[]
+    for rel,lines in docs:
+        for n,line,st in lines:
+            if rx.search(line):
+                hits.append({"file":rel,"line":n,"text":st[:160]})
+    results.append({**{k:cat[k] for k in ("id","title","severity","tier","why","fix")},
+                    "expectZero":cat.get("expectZeroInDuoReadyApp",False),
+                    "count":len(hits),"hits":hits})
 
-scan "P1 candidate: device idiom/model layout assumptions" \
-  'UIDevice\.current\.userInterfaceIdiom|userInterfaceIdiom|isDuo|isIPhoneDuo|isFolded|isUnfolded'
+blocking=[r for r in results if r["expectZero"] and r["count"]>0]
 
-scan "P1 candidate: orientation-driven layout" \
-  'interfaceOrientation|deviceOrientation|isLandscape|isPortrait|orientation[[:space:]]*=='
+if as_json:
+    print(json.dumps({"root":root,"patternsVersion":cfg["patternsVersion"],
+                      "filesScanned":len(files),"swiftFiles":swift_files,
+                      "categories":results},indent=2))
+    sys.exit(1 if blocking else 0)
 
-scan "P1/P2 candidate: explicit screen-width breakpoints" \
-  '(geometry|proxy|size|width|bounds\.width)[^\n]{0,80}[<>]=?[[:space:]]*[0-9]{3,4}'
+W=76
+print("="*W)
+print("iPhone Duo readiness scan".center(W))
+print("="*W)
+print(f"root            {root}")
+print(f"files scanned   {len(files)}  ({swift_files} Swift)")
+print(f"patterns        v{cfg['patternsVersion']}\n")
 
-scan "P2 candidate: large fixed frames" \
-  '\.frame\([[:space:]]*(width|height):[[:space:]]*[0-9]{3,4}'
+order={"P0":0,"P1":1,"P2":2,"info":3}
+for r in sorted(results,key=lambda r:(order.get(r["severity"],9),-r["count"])):
+    if r["count"]==0 and quiet: continue
+    flag = "  <-- must be zero" if (r["expectZero"] and r["count"]) else ""
+    print(f"[{r['severity']:<4}] tier {r['tier']}  {r['title']}  ({r['count']} hits){flag}")
+    if r["count"]:
+        print(f"         why  {r['why']}")
+        print(f"         fix  {r['fix']}")
+        for h in r["hits"][:6]:
+            print(f"           {h['file']}:{h['line']}  {h['text'][:90]}")
+        if r["count"]>6: print(f"           ... {r['count']-6} more")
+    print()
 
-scan "P2 candidate: fixed grid columns" \
-  'GridItem\(\.fixed|Array\(repeating:[[:space:]]*GridItem|columns[[:space:]]*=[[:space:]]*[0-9]'
+adopt=next((r for r in results if r["id"]=="duo-api-surface"),None)
+if adopt is not None and adopt["count"]==0 and swift_files>20:
+    print("note: zero Duo API adoption across a non-trivial codebase.")
+    print("      Expected if you are starting Tier 1. Suspicious if you believe\n"
+          "      this app already ships Duo-aware layout.\n")
 
-scan "Review: custom navigation/tab/toolbar components" \
-  '(Custom|Floating|Bottom|Top)(Tab|TabBar|Toolbar|Nav|Navigation|NavigationBar)|struct[[:space:]]+[A-Za-z0-9_]*(TabBar|Toolbar|NavigationBar)'
-
-scan "Review: safe-area overrides" \
-  'ignoresSafeArea|safeAreaInset|safeAreaInsets|edgesIgnoringSafeArea'
-
-scan "Review: geometry-heavy layout" \
-  'GeometryReader|onGeometryChange|containerRelativeFrame'
-
-scan "Review: Duo-era APIs" \
-  'reservedRegions|ReservedRegion|ArrangementView|arrangementViewStyle|overlayArrangementZIndex|onHingeChange|sceneAccessory|CameraCaptureAccessory|toolbarVertical|axisBehavior|visibilityPriority|ToolbarOverflowMenu'
-
-scan "Review: camera direction/rotation" \
-  'AVCaptureDeviceDirectionCoordinator|AVCaptureDeviceRotationCoordinator|builtInOuterUltraWideCamera|builtInInnerUltraWideCamera|dynamicAspectRatio|isCameraSensorOrientationCompensationEnabled'
-
-scan "Review: scene/window activation" \
-  'WindowGroup|openWindow|requestSceneSessionActivation|UIWindowScene|scenePhase|SceneStorage'
-
-echo "Suggested next steps:"
-echo "1. Inspect P1 candidates first."
-echo "2. Classify findings as Tier 1, Tier 2, or Tier 3 using SKILL.md."
-echo "3. Confirm whether each match actually controls layout or state."
-echo "4. Build a screen inventory and test narrow/intermediate/expansive widths."
-echo "5. Verify iOS 27.1 symbols against the active Xcode SDK before implementation."
+print("-"*W)
+if blocking:
+    print("VERDICT: material refactor needed — "
+          + ", ".join(f"{b['title']} ({b['count']})" for b in blocking))
+else:
+    print("VERDICT: no blocking patterns. Grep cannot judge layout quality —\n"
+          "         continue with the screen-by-screen audit in references/06.")
+print("-"*W)
+print("\nThis is a heuristic. Confirm every hit before acting on it.")
+sys.exit(1 if blocking else 0)
+PY

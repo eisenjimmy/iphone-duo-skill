@@ -1,0 +1,152 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly: Apple's iPhone Duo docs are still landing. Catch rot without
+    # anyone having to remember to look.
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: Structure and data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skill layout is valid
+        run: |
+          set -e
+          test -f skills/iphone-duo/SKILL.md
+          test -f skills/iphone-duo/data/api-manifest.json
+          test -f skills/iphone-duo/data/patterns.json
+          test -x skills/iphone-duo/scripts/audit-duo.sh
+          test -x skills/iphone-duo/scripts/verify-manifest.sh
+          # Agent Skills spec: directory name must match the frontmatter `name:`
+          name=$(awk '/^name:/{print $2; exit}' skills/iphone-duo/SKILL.md)
+          [ "$name" = "iphone-duo" ] || { echo "name: '$name' != directory 'iphone-duo'"; exit 1; }
+          echo "layout ok"
+
+      - name: JSON parses
+        run: |
+          python3 -m json.tool skills/iphone-duo/data/api-manifest.json > /dev/null
+          python3 -m json.tool skills/iphone-duo/data/patterns.json > /dev/null
+          echo "json ok"
+
+      - name: SVG assets are well-formed
+        run: |
+          python3 - <<'PY'
+          import xml.dom.minidom, pathlib, sys
+          bad = []
+          for f in sorted(pathlib.Path('assets').glob('*.svg')):
+              try:
+                  xml.dom.minidom.parse(str(f))
+                  print(f"ok   {f}")
+              except Exception as e:
+                  bad.append(f"{f}: {e}")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          PY
+
+      - name: No Apple imagery committed
+        run: |
+          # Apple images are hotlinked, never vendored. See NOTICE.md.
+          if find . -path ./.git -prune -o \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.heic' \) -print | grep -q .; then
+            echo "Raster image committed. Apple imagery must stay hotlinked — see NOTICE.md."
+            find . -path ./.git -prune -o \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.heic' \) -print
+            exit 1
+          fi
+          echo "no raster assets — ok"
+
+  shell:
+    name: Shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck -S warning skills/iphone-duo/scripts/*.sh
+
+      - name: audit-duo.sh self-test
+        run: |
+          set -e
+          mkdir -p /tmp/fixture/Sources
+          cat > /tmp/fixture/Sources/Bad.swift <<'EOF'
+          import SwiftUI
+          struct RootView: View {
+              var body: some View {
+                  let w = UIScreen.main.bounds.width
+                  if isDuo { A() } else { B() }
+                  Grid().frame(width: 428)
+              }
+          }
+          final class compactViewModel {}
+          EOF
+          cat > /tmp/fixture/Sources/Good.swift <<'EOF'
+          import SwiftUI
+          struct DetailView: View {
+              @Environment(\.horizontalSizeClass) private var sizeClass
+              var body: some View { Text("hi") }
+          }
+          EOF
+          # must exit 1 on a codebase containing must-be-zero patterns
+          if bash skills/iphone-duo/scripts/audit-duo.sh /tmp/fixture; then
+            echo "FAIL: audit exited 0 on a repo full of P0/P1 patterns"; exit 1
+          fi
+          echo "audit correctly flags a bad fixture"
+          # and exit 0 on a clean one
+          rm /tmp/fixture/Sources/Bad.swift
+          bash skills/iphone-duo/scripts/audit-duo.sh /tmp/fixture
+          echo "audit correctly passes a clean fixture"
+
+  manifest:
+    name: Apple symbols still resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # On a PR, run offline. A contributor's correction must not go red because
+      # the research date aged out or because Apple rate-limited 34 requests from
+      # a fork. Structure and coverage are still fully enforced.
+      - name: verify-manifest.sh (offline)
+        if: github.event_name == 'pull_request'
+        run: OFFLINE=1 bash skills/iphone-duo/scripts/verify-manifest.sh
+
+      # On push and on the weekly schedule, do the full network + staleness check.
+      - name: verify-manifest.sh (full)
+        if: github.event_name != 'pull_request'
+        run: bash skills/iphone-duo/scripts/verify-manifest.sh
+
+  links:
+    name: Internal links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every relative link resolves
+        run: |
+          python3 - <<'PY'
+          import re, pathlib, sys
+          # Markdown links AND the HTML src=/href= the READMEs are mostly built from.
+          MD   = re.compile(r'\[[^\]]*\]\(([^)#]+?)(?:#[^)]*)?\)')
+          HTML = re.compile(r'(?:src|href)="([^"#]+?)(?:#[^"]*)?"')
+          bad = []
+          for md in pathlib.Path('.').rglob('*.md'):
+              if '.git' in md.parts: continue
+              text = md.read_text()
+              for rx in (MD, HTML):
+                  for m in rx.finditer(text):
+                      t = m.group(1).strip()
+                      if t.startswith(('http://', 'https://', 'mailto:', 'data:')): continue
+                      if not (md.parent / t).exists():
+                          bad.append(f"{md}: {t}")
+          for b in sorted(set(bad)): print("broken:", b)
+          print(f"checked {len(list(pathlib.Path('.').rglob('*.md')))} markdown files")
+          sys.exit(1 if bad else 0)
+          PY

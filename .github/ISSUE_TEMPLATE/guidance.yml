@@ -1,0 +1,29 @@
+name: Guidance is wrong or incomplete
+description: A rule contradicts Apple, is unactionable, or is missing
+title: "[Guidance] "
+labels: ["guidance"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: File and section
+      placeholder: "references/02-bars-and-navigation.md — Toolbar versus tab compression"
+    validations: { required: true }
+  - type: textarea
+    id: says
+    attributes:
+      label: What it currently says
+    validations: { required: true }
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong
+      description: |
+        Especially useful: a rule an agent can't act on. "Prefer X where appropriate"
+        is not decidable — if that's the problem, say so and propose the sharper test.
+    validations: { required: true }
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Apple source
+      description: HIG URL, or Tech Talk plus timestamp.
