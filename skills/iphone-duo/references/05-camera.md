@@ -196,7 +196,7 @@ recording state
 visual prompt for child/group photo
 ```
 
-See `04-scenes-and-multidisplay.md` for scene-accessory rules.
+See `04-hardware-scenes-hinge.md` for scene-accessory lifecycle, availability, and privacy rules.
 
 ## Camera capture accessory
 
