@@ -4,276 +4,186 @@
 
 <br>
 
-**하나의 적응형 iPhone 앱이 모든 자세에서 일관되게 동작하도록, 코딩 에이전트를 가르칩니다.**
+**모든 iPhone Duo 자세와 화면 크기에서 하나의 앱이 일관되게 동작하도록 만드는 source-backed Agent Skill입니다.**
 
 <sub>[English](../../README.md) · [Español](../es/README.md) · 한국어</sub>
 
-<img src="../../assets/meta.svg" alt="MIT 라이선스 · Apple 심볼 59개 추적 · 34개 CI 검증 · iOS 27.1 · Agent Skills 형식" width="100%">
+<img src="../../assets/meta.svg" alt="MIT 라이선스 · schema 기반 Apple API manifest · 로컬 검증 · iOS 27.1 · Agent Skills" width="100%">
 
 </div>
 
-<br>
+## 핵심 원칙
 
-<div align="center">
-<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/tile/Apple-iPhone-Duo-opening-iPhone-Duo-260909-lp.jpg.landing-big_2x.jpg" alt="내부 디스플레이가 보이도록 펼쳐지는 iPhone Duo" width="82%">
-<br><sub>iPhone Duo · 이미지 © Apple Inc., apple.com에서 직접 제공 — <a href="../../NOTICE.md">이 저장소에 재배포하지 않음</a></sub>
-</div>
-
-<br>
-
-## 문제
-
-iPhone Duo에는 두 개의 디스플레이, 다섯 가지 자세, 힌지, 레이아웃을 가로지르는 접힘,
-그리고 두 개의 전면 카메라가 있습니다. 에이전트에게 "iPhone Duo를 지원해 줘"라고 하면
-가장 나쁜 답을 내놓습니다.
+iPhone Duo를 위해 별도의 UI 트리를 만들지 않습니다.
 
 ```swift
-if isDuo { DuoDashboard() } else { Dashboard() }   // 곧바로 벌어지는 두 개의 UI
+if isDuo {
+    DuoDashboard()
+} else {
+    Dashboard()
+}
 ```
 
-이 스킬이 그것을 막습니다. 라이브러리가 아니라 **규칙서**입니다. 항상 로드되는 약 3,300
-토큰과, 필요할 때만 불러오는 참조 문서(총 약 20,000 토큰)로 구성됩니다. 가르치는 것은 단 하나입니다.
+이 방식은 화면 상태가 변할수록 두 UI가 서로 다른 제품으로 갈라지기 쉽습니다.
+이 스킬은 다음 한 문장을 중심으로 설계되어 있습니다.
 
-> **레이아웃은 사용 가능한 공간에 반응한다. 물리적 상호작용만이 힌지에 반응할 수 있다.**
+> **레이아웃은 사용 가능한 공간에 반응한다. 물리적 상호작용만 힌지에 반응할 수 있다.**
 
-<br>
+먼저 모든 크기에서 잘 동작하는 하나의 adaptive hierarchy를 만들고, 그 다음에만
+reserved region, `ArrangementView`, hinge, scene accessory 같은 Duo 고유 기능을 추가합니다.
 
-<div align="center">
-<img src="../../assets/poses.svg" alt="iPhone Duo의 다섯 가지 자세 — 닫힘, 세로, 가로, 세워둠, 세움 — 과 각각이 요구하는 레이아웃" width="100%">
-</div>
-
-<br>
-
-## 빠른 시작
+## 설치
 
 ```bash
 git clone https://github.com/eisenjimmy/iphone-duo-skill.git
 
-# 범용 Agent Skills 경로. 심볼릭 링크를 사용하면 'git pull' 업데이트가 바로 반영됩니다.
 mkdir -p ~/.agents/skills
 ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.agents/skills/iphone-duo
 ```
 
-<details>
-<summary><b>에이전트별 설치 경로</b></summary>
-
-<br>
-
-스킬은 일반 디렉터리입니다. Agent Skills를 지원하는 도구라면 어디든 연결할 수 있습니다.
+도구별 경로:
 
 | 도구 | 경로 |
 |---|---|
 | Codex | `~/.codex/skills/iphone-duo` |
 | Cursor / 범용 | `~/.agents/skills/iphone-duo` |
 
-저장소 업데이트가 즉시 반영되도록 심볼릭 링크 사용을 권장합니다. 복사한다면 **병합이 아니라 교체**해야 합니다. 그러지 않으면 이름이 바뀐 파일이 남을 수 있습니다.
+실제 agent contract는 [`skills/iphone-duo/SKILL.md`](../../skills/iphone-duo/SKILL.md)입니다.
 
-```bash
-rm -rf ~/.agents/skills/iphone-duo
-cp -R iphone-duo-skill/skills/iphone-duo ~/.agents/skills/
-```
-
-**로드 확인:** 사용하는 도구가 스킬 목록 명령을 제공하면 해당 명령을 사용하거나, 에이전트에게 `iphone-duo` 스킬이 로드되었는지 확인하세요.
-
-</details>
-
-<br>
-
-## 사용법
-
-프롬프트 세 개면 대부분 해결됩니다.
+## 사용 예시
 
 ```text
-iphone-duo 스킬로 이 저장소를 점검해 줘. 아직 코드는 바꾸지 마.
-파일별 근거, 각 이슈의 tier, 그리고 가장 작은 실행 계획을 줘.
+iphone-duo 스킬로 이 저장소를 audit해 줘. 아직 코드는 수정하지 마.
+파일별 근거, severity, tier, 그리고 가장 작은 구현 계획을 반환해.
 ```
 
 ```text
-iphone-duo 스킬로 이 앱을 iPhone Duo에 맞게 적응시켜 줘. 크기가 바뀌는 동안
-내비게이션과 뷰 상태를 유지하고, Duo 전용 API를 쓰기 전에 Tier 1을 먼저 끝내.
+iphone-duo 스킬로 이 앱을 iPhone Duo에 맞게 적응시켜 줘.
+리사이즈 중 navigation과 view state를 유지하고 Tier 1을 먼저 끝내.
 ```
 
 ```text
-이 화면을 부분적으로 펼친 iPhone Duo 기준으로 검토해 줘.
-접힘 간섭, 조작 가능성, 그리고 여기서 힌지를 실제로 써야 하는 부분이 있는지.
+이 화면을 partially-open iPhone Duo 기준으로 검토해 줘.
+fold interference, reachability, state continuity와 실제 hinge input이 필요한지 확인해.
 ```
 
-### 좋은 실행 결과의 예
+## 세 개의 Tier
 
-```text
-[P1  ] tier 1  Device-identity layout branch  (3 hits)  <-- must be zero
-         why  Layout must react to available space, not to which device it runs on.
-         fix  Size classes, container geometry, ViewThatFits/AnyLayout.
-           Sources/Dashboard.swift:44  if isDuo { DuoDashboard() } else { Dashboard() }
-
-[P2  ] tier 2  Fixed grid column count  (1 hits)
-         why  Apple advises an EVEN column count so content divides across the fold.
-         fix  GridItem(.adaptive(minimum:)) sized to keep the count even.
-           Sources/Gallery.swift:31    count: 3
-
-VERDICT: material refactor needed — Device-identity layout branch (3)
-```
-
-> **Xcode가 27.1 이전 버전이라면** 에이전트는 Duo 전용 작업을 `SDK-blocked`으로 표시하고
-> 거기서 멈춥니다. 버그가 아니라 의도된 동작입니다. Tier 1만으로도 이미 지원 중인 모든
-> 기기에서 앱이 좋아집니다.
-
-<br>
-
-<div align="center">
-<img src="../../assets/workflow.svg" alt="에이전트의 동작 순서: 스캔, 분류, 계획, Tier 1 우선 구현, 모든 자세에서 검증" width="100%">
-</div>
-
-<br>
-
-## 이 스킬이 실제로 아는 것
-
-<div align="center">
-<img src="../../assets/reserved-regions.svg" alt="세 가지 예약 영역: 외부 카메라 가림, 내부 카메라 가림, 그리고 접힘 분할 영역" width="100%">
-</div>
-
-<br>
-
-접힘은 피해서 그리는 선이 아닙니다. 시스템이 캔버스에서 **예약 영역(reserved region)** 을
-잘라냅니다 — 카메라 *가림(occlusion)* 두 개와 접힘 *분할(division)* 하나. 그리고 이 차이가
-중요합니다. **가림은 덮고, 분할은 쪼갭니다.** 둘을 혼동하는 것이 Duo에서 가장 흔한 레이아웃
-버그이며, 에이전트가 조용히 틀리기 쉬운 종류의 실수입니다.
-
-놓치기 쉬운 Apple 지침도 함께 담고 있습니다.
-
-- 내부 디스플레이는 **세로 방향에서 가로 바를 유지합니다** — 측면 컨트롤의 유일한 예외입니다.
-- 세로 바는 **하드웨어에 정렬**되므로 **RTL 언어에서도 좌우가 바뀌지 않습니다**.
-- Split View에서 각 앱은 자신의 **바깥쪽** 가장자리에 컨트롤을 둡니다.
-- 그리드는 접힘을 기준으로 깔끔히 나뉘도록 **짝수** 열을 선호해야 합니다.
-- 게임은 방향을 고정해도 되지만 **화면을 가득 채워야** 합니다. 레터박스보다 화면비 변경이
-  우선입니다.
-- `builtInDuoCamera`는 **후면 카메라를 가리키는 iOS 10의 폐기된 별칭**입니다. iPhone Duo와
-  아무 관련이 없으며, "Duo"를 검색한 에이전트가 가장 먼저 발견하게 되는 함정입니다.
-
-<br>
-
-## 세 개의 tier, 순서대로
-
-<div align="center">
-<img src="../../assets/tiers.svg" alt="Tier 1 범용 적응 기반, Tier 2 Duo 인식 표현, Tier 3 Duo 전용 기능" width="100%">
-</div>
-
-<br>
-
-"iPhone Duo 지원"의 대부분은 Tier 1이며, 이미 지원 중인 모든 기기를 함께 개선하는 작업입니다.
-아래는 실제 변환 예시이고, **Duo API를 전혀 쓰지 않습니다.**
-
-```diff
--        if isDuo && !isFolded {
--            LazyVGrid(columns: Array(repeating: GridItem(.fixed(200)), count: 3)) { … }
--                .environmentObject(wideVM)
--        } else {
--            List { … }.environmentObject(compactVM)
--                .frame(width: UIScreen.main.bounds.width)
--        }
-+        NavigationSplitView {
-+            SidebarList(model: model)
-+        } detail: {
-+            // 220 = 카드의 최소 가독 너비. 결과 열 개수가 짝수인지 직접 확인하세요 —
-+            // Apple은 Duo의 포인트 크기를 공개하지 않습니다.
-+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)]) {
-+                ForEach(model.items) { ItemCell(item: $0) }
-+            }
-+        }
-```
-
-<br>
-
-## 신뢰할 수 있는 이유
-
-베타 SDK를 그대로 적어둔 스킬은 조용히 낡고, 결국 존재한 적 없는 심볼을 에이전트에게 자신
-있게 건네줍니다. 이 스킬은 그런 일이 소리 없이 일어날 수 없도록 설계했습니다.
-
-모든 Apple 심볼은 **[`data/api-manifest.json`](../../skills/iphone-duo/data/api-manifest.json)**
-에 기록되며, 본문은 그 상태를 부풀려 말할 수 없습니다.
-
-| 상태 | 의미 | 개수 |
+| Tier | 목적 | 예시 |
 |---|---|---|
-| `verified` | Apple 문서 페이지가 지금 실제로 응답함 | **34** |
-| `apple-sourced` | Apple 코드 샘플 그대로. 문서 페이지는 아직 없음 (iOS 27.1) | **23** |
-| `conflicted` | Apple 자체 자료끼리 표기가 어긋남 | **2** |
+| **Tier 1** | 모든 화면 크기에서 기본 구조를 adaptive하게 만들기 | size class, `NavigationSplitView`, adaptive grid, `ViewThatFits`, `AnyLayout`, safe area |
+| **Tier 2** | Duo의 물리적 화면 구조에 맞게 표현 조정 | reserved region, displacement, `ArrangementView`, vertical bar, overflow |
+| **Tier 3** | Duo 하드웨어 자체를 제품 기능으로 사용 | hinge input, multiple scenes, scene accessory, camera direction coordination |
 
-```bash
-bash skills/iphone-duo/scripts/verify-manifest.sh
+Tier 1이 항상 먼저입니다. “Duo 지원”이라는 이유만으로 Tier 2/3 API를 쓰지 않습니다.
+
+## 이 스킬이 금지하는 것
+
+- `isDuo`, device model, display identity로 일반 레이아웃을 결정하지 않기
+- hinge angle로 sidebar, column, navigation collapse를 결정하지 않기
+- compact/expanded용 state tree를 따로 만들지 않기
+- `UIScreen.main`이나 복사한 hardware width를 레이아웃 기준으로 사용하지 않기
+- 중요한 버튼, QR code, drag handle, label을 fold/occlusion 위에 두지 않기
+- manifest에 없는 Apple symbol을 그럴듯하게 만들어내지 않기
+- inner/outer display를 독립적인 두 canvas처럼 직접 관리하지 않기
+
+## Safe area, reserved region, hinge는 서로 다릅니다
+
+```text
+safe area       → system UI / edge protection
+reserved region → fold나 camera처럼 usable geometry 내부의 물리적 영역
+hinge input     → 실제 기기 움직임을 이용한 interaction/effect
 ```
 
-문서화된 모든 심볼을 developer.apple.com에 다시 조회하고, 참조 문서가 매니페스트에 없는
-심볼을 언급하면 실패하며, 45일이 지나면 **스스로 만료**됩니다. 오래된 조사 날짜가 조용한
-거짓말이 아니라 빨간 CI로 드러나게 하기 위해서입니다. CI에서 매주 실행됩니다.
+fold는 **division region**, camera는 **occlusion region**입니다. 이 차이를 구분해야
+content를 split할지, 조금 이동할지, 단순히 가려지지 않게 할지 올바르게 결정할 수 있습니다.
 
-점검 스크립트도 자체 패턴을 갖지 않습니다.
-[`data/patterns.json`](../../skills/iphone-duo/data/patterns.json)을 실행할 뿐이므로,
-규칙을 추가할 곳은 정확히 한 군데입니다.
+## ArrangementView
+
+`ArrangementView`는 두 개의 관련 surface를 재배치할 때 사용합니다. 앱 navigation을
+대체하는 컨테이너가 아닙니다.
+
+- split: 두 surface가 각각 독립된 공간을 가져야 할 때
+- overlay: 한 surface가 다른 surface 앞에 놓일 때
+
+overlay에서 **primary view가 foreground**입니다. partially open 상태에서는 시스템이 두
+surface를 서로 다른 영역으로 이동시킬 수 있습니다. 따라서 “player니까 primary”처럼 이름만
+보고 role을 정하지 말고 실제 foreground 의미에 따라 primary/secondary를 결정해야 합니다.
+
+## API 사실 검증
+
+Apple symbol은 모두
+[`data/api-manifest.json`](../../skills/iphone-duo/data/api-manifest.json)에 기록됩니다.
+
+- `verified`: 현재 Apple DocC 페이지가 확인됨
+- `apple-sourced`: Apple sample/chapter에서 확인됐지만 전용 DocC 페이지는 아직 없음
+- `conflicted`: Apple 자료끼리 이름/표기가 충돌함 — active SDK 확인 필요
+
+manifest 구조는
+[`api-manifest.schema.json`](../../skills/iphone-duo/data/api-manifest.schema.json)이 정의합니다.
+
+## 로컬 검증
+
+변경 후 전체 검증:
+
+```bash
+bash skills/iphone-duo/scripts/verify-all.sh
+```
+
+Apple 문서 URL까지 다시 확인:
+
+```bash
+bash skills/iphone-duo/scripts/verify-all.sh --online
+```
+
+실제 앱 저장소 audit:
 
 ```bash
 bash skills/iphone-duo/scripts/audit-duo.sh ~/code/MyApp
 ```
 
-<br>
+`audit-duo.sh` 결과는 heuristic입니다. grep hit 자체가 버그라는 뜻은 아니므로 agent가 실제
+layout decision인지 확인해야 합니다.
 
-## 출처
-
-모든 내용은 Apple 자료에서 나옵니다. 지어낸 것은 없습니다. `conflicted` 항목 두 개는 Apple
-자체 자료가 서로 어긋나기 때문에 존재하며, 스킬은 임의로 한쪽을 고르지 않고 그 사실을
-그대로 밝힙니다.
-
-출시 Tech Talk 6편 —
-[Design](https://developer.apple.com/videos/play/tech-talks/111466/) ·
-[Prepare your app](https://developer.apple.com/videos/play/tech-talks/111461/) ·
-[Raise the bar](https://developer.apple.com/videos/play/tech-talks/111462/) ·
-[Strike a pose](https://developer.apple.com/videos/play/tech-talks/111463/) ·
-[Displays and scenes](https://developer.apple.com/videos/play/tech-talks/111464/) ·
-[Camera](https://developer.apple.com/videos/play/tech-talks/111465/) —
-그리고 [휴먼 인터페이스 가이드라인](https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo),
-[개발자 허브](https://developer.apple.com/iphone-duo/).
-전체 출처: [`references/08-sources.md`](../../skills/iphone-duo/references/08-sources.md).
-
-<br>
-
-## 구성
+## 문서 구조
 
 ```text
 skills/iphone-duo/
-├── SKILL.md                   항상 로드 · 약 3,300 토큰
+├── SKILL.md
 ├── data/
-│   ├── api-manifest.json      ← 심볼의 실재 여부를 판단하는 유일한 기준
-│   └── patterns.json          ← 안티패턴 목록의 유일한 출처
+│   ├── api-manifest.json
+│   ├── api-manifest.schema.json
+│   └── patterns.json
 ├── scripts/
-│   ├── audit-duo.sh           patterns.json을 코드베이스에 실행
-│   └── verify-manifest.sh     모든 심볼 재검증 · 45일 후 만료
-└── references/                필요할 때만 로드 · 총 약 20,000 토큰
+│   ├── audit-duo.sh
+│   ├── verify-all.sh
+│   └── verify-manifest.sh
+└── references/
+    ├── 01-design-and-layout.md
+    ├── 02-bars-and-navigation.md
+    ├── 03-fold-arrangements.md
+    ├── 04-hardware-scenes-hinge.md
+    ├── 05-camera.md
+    ├── 06-testing-and-review.md
+    ├── 07-api-cookbook.md
+    └── 08-sources.md
 ```
 
-<br>
+세부 기술 규칙의 canonical source는 영어 `SKILL.md`와 `references/`입니다. 한국어 문서는
+빠르게 이해하기 위한 human-facing summary로 유지합니다.
 
-## 이 스킬이 아닌 것
+## 출처 우선순위
 
-라이브러리가 아닙니다. 링크할 수 있는 Swift 코드를 제공하지 않습니다. 에이전트가 여러분의
-코드를 *어떻게 판단하는지*를 바꿀 뿐이며, 결과물은 개선된 여러분의 코드베이스입니다.
+자료가 충돌하면 다음 순서를 따릅니다.
 
-<br>
+1. active SDK/compiler
+2. 최신 Apple API documentation
+3. 최신 Apple HIG
+4. Apple Tech Talk / sample code
+5. 이 저장소의 synthesis
+6. third-party example
 
-## 기여
+전체 Apple 출처는
+[`references/08-sources.md`](../../skills/iphone-duo/references/08-sources.md)에 정리되어 있습니다.
 
-Apple의 iPhone Duo 문서는 아직 공개되는 중입니다. **여기서 가장 가치 있는 기여는 수정입니다.**
-심볼 이름이 바뀌었거나 HIG가 갱신되었다면 이슈를 열어 주세요. 대개 CI가 이미 같은 결론에
-도달해 있을 것입니다.
-
-[기여 가이드](../../CONTRIBUTING.md) · [행동 강령](../../CODE_OF_CONDUCT.md) · [보안](../../SECURITY.md) · [변경 이력](../../CHANGELOG.md)
-
-<br>
-
-<div align="center">
-<sub>
-
-[MIT](../../LICENSE) · Apple Inc.와 제휴 관계 없음 · [상표 및 이미지 고지](../../NOTICE.md)
-
-선행 작업: [FloWritesCode/fwc-swiftui-skills](https://github.com/FloWritesCode/fwc-swiftui-skills)
-
-</sub>
-</div>
+[MIT](../../LICENSE) · [Security](../../SECURITY.md) · [Changelog](../../CHANGELOG.md) · [Notice](../../NOTICE.md)
