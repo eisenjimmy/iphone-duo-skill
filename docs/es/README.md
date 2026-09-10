@@ -50,13 +50,13 @@ sola idea:
 ```bash
 git clone https://github.com/eisenjimmy/iphone-duo-skill.git
 
-# Enlace simbólico para que 'git pull' mantenga la skill al día (recomendado)
-mkdir -p ~/.claude/skills
-ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.claude/skills/iphone-duo
+# Ubicación universal de Agent Skills; el enlace simbólico mantiene las actualizaciones de 'git pull'
+mkdir -p ~/.agents/skills
+ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.agents/skills/iphone-duo
 ```
 
 <details>
-<summary><b>Otros agentes y rutas de instalación</b></summary>
+<summary><b>Rutas de instalación por agente</b></summary>
 
 <br>
 
@@ -64,21 +64,17 @@ La skill es un directorio normal. Apunta cualquier entorno compatible con Agent 
 
 | Entorno | Ruta |
 |---|---|
-| Claude Code (global) | `~/.claude/skills/iphone-duo` |
-| Claude Code (un proyecto) | `<tu-app>/.claude/skills/iphone-duo` ← normalmente lo que quieres |
 | Codex | `~/.codex/skills/iphone-duo` |
 | Cursor / universal | `~/.agents/skills/iphone-duo` |
 
-Usa el enlace simbólico de arriba. Si prefieres copiar, **reemplaza en vez de fusionar**, o
-quedarán archivos renombrados:
+Usa un enlace simbólico para que las actualizaciones del repositorio se propaguen de inmediato. Si prefieres copiar, **reemplaza en vez de fusionar**, o pueden quedar archivos renombrados:
 
 ```bash
-rm -rf ~/.claude/skills/iphone-duo
-cp -R iphone-duo-skill/skills/iphone-duo ~/.claude/skills/
+rm -rf ~/.agents/skills/iphone-duo
+cp -R iphone-duo-skill/skills/iphone-duo ~/.agents/skills/
 ```
 
-**Comprueba que cargó:** ejecuta `/skills` en Claude Code, o simplemente pregunta:
-*"¿tienes la skill iphone-duo?"*
+**Comprueba que cargó:** usa el comando de listado de skills de tu entorno cuando exista, o pregunta al agente si la skill `iphone-duo` está cargada.
 
 </details>
 
@@ -183,7 +179,7 @@ dispositivos a los que ya das soporte. Esta transformación real **no usa ningun
 +            SidebarList(model: model)
 +        } detail: {
 +            // 220 = ancho mínimo legible de la tarjeta. Comprueba que el número de
-            // columnas resultante sea par — Apple no publica los tamaños en puntos del Duo.
++            // columnas resultante sea par — Apple no publica los tamaños en puntos del Duo.
 +            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)]) {
 +                ForEach(model.items) { ItemCell(item: $0) }
 +            }
