@@ -13,7 +13,7 @@ compatibility: >-
   when the active SDK is older.
 metadata:
   author: eisenjimmy
-  version: "2.1.0"
+  version: "2.3.0"
   research-date: "2026-09-10"
   fact-source: "data/api-manifest.json"
 ---
@@ -45,10 +45,11 @@ identity.
 | `references/07-api-cookbook.md` | **The code index.** Every full call site and transformation |
 | `references/08-sources.md` | Apple provenance, freshness, source precedence |
 
-`data/api-manifest.json` is the **only** authority on whether an API symbol is real.
-Its `status` field says `verified` (Apple doc page resolves), `apple-sourced` (verbatim
-from an Apple sample, no doc page yet), or `conflicted` (Apple's own materials disagree).
-**Never emit a symbol that is not in the manifest.**
+`data/api-manifest.json` is the **only** authority on whether an Apple API symbol named by
+this skill is real. Its `status` field says `verified` (Apple doc page resolves),
+`apple-sourced` (verbatim from Apple sample/chapter material, no dedicated DocC page yet),
+or `conflicted` (Apple's own materials disagree). **Never invent or silently substitute a
+Duo-relevant symbol.** If the manifest or active SDK cannot support it, report `SDK-blocked`.
 
 ---
 
@@ -84,8 +85,8 @@ Each rule states the violation that proves it.
     accessory, or second display is absent. A nil hinge means the device has none.
 12. **Never invent a dimension.** Apple publishes pixel sizes but **not** logical point
     sizes and **not** the native scale. Query the environment.
-13. **Never invent an API.** If the manifest lacks it or the SDK cannot resolve it,
-    report it `SDK-blocked` and stop.
+13. **Never invent an API.** If the manifest lacks a Duo-relevant symbol or the SDK cannot
+    resolve it, report it `SDK-blocked` and stop rather than guessing.
 
 ### Reject on sight
 
@@ -139,7 +140,7 @@ support exist.
 SDK reality, per Apple: apps run un-recompiled; the **iOS 27 SDK** extends the app left
 of the status bar on the inner display; the **iOS 27.1 SDK** reaches the screen edge and
 lays bars out vertically. Tier 2 and 3 need 27.1. Test in the iPhone Duo simulator via
-**DeviceHub** in Xcode 27.1, which can open, close, rotate, and fold the device.
+**Device Hub** in Xcode 27.1, which can open, close, rotate, and fold the device.
 
 ### 2. Scan
 
@@ -244,6 +245,9 @@ poses. Label every claim with exactly one of:
 
 If no Duo simulator is available, mark rows `design-verified` and stop. **Never describe
 an unexecuted check as a test.**
+
+For changes to this skill repository itself, run `scripts/verify-all.sh`. Use
+`scripts/verify-all.sh --online` whenever Apple API evidence changes.
 
 ---
 
