@@ -1,86 +1,148 @@
 # Contributing
 
-Apple's iPhone Duo documentation is still shipping. **Corrections are the most valuable
-contribution to this repository** — more valuable than new prose.
+Apple's iPhone Duo documentation is still settling. **Corrections are more valuable than
+additional prose** until the iOS 27.1 surface is fully stable.
 
-## The one rule
+## The non-negotiable rule
 
-> **Never add an API symbol to a reference file without adding it to
-> `skills/iphone-duo/data/api-manifest.json` first.**
+> **Never add an Apple API symbol to a reference file before adding it to
+> `skills/iphone-duo/data/api-manifest.json`.**
 
-CI enforces this. A reference file that names a symbol the manifest doesn't carry fails the
-build. This is deliberate: the whole promise of the skill is that an agent reading it will
-not be handed an invented API.
+The skill's value depends on separating evidence from prose. A symbol may be discussed only
+when the manifest records its spelling, framework, evidence status, availability, and the
+reference files that use it.
 
-## Where things live
+## One home for each kind of fact
 
-There is exactly one home for each kind of fact. If you find yourself typing something twice,
-you are editing the wrong file.
-
-| Kind of change | File |
+| Kind of change | Canonical file |
 |---|---|
-| An Apple symbol — name, availability, status | `data/api-manifest.json` |
-| An anti-pattern the audit should catch | `data/patterns.json` |
-| A full, pasteable call site | `references/07-api-cookbook.md` |
-| Judgment, rules, guidance | `references/01`–`06` |
-| Where a claim came from | `references/08-sources.md` |
-| A core rule every task needs | `SKILL.md` |
+| Apple symbol name, availability, evidence status | `skills/iphone-duo/data/api-manifest.json` |
+| Manifest structural rules | `skills/iphone-duo/data/api-manifest.schema.json` |
+| Audit anti-pattern | `skills/iphone-duo/data/patterns.json` |
+| Full pasteable API example | `skills/iphone-duo/references/07-api-cookbook.md` |
+| Design/implementation judgment | `skills/iphone-duo/references/01`–`06` |
+| Source provenance | `skills/iphone-duo/references/08-sources.md` |
+| Rule every invocation must know | `skills/iphone-duo/SKILL.md` |
 
-`SKILL.md` always loads into the agent's context. Adding to it costs every user tokens on
-every invocation — argue for it, don't assume it.
+If the same fact is being maintained manually in several places, the design is wrong.
 
-## Symbol status
+`SKILL.md` is expensive context: every invocation loads it. Keep detailed examples and
+secondary explanation in the focused references.
 
-`status` in the manifest is a claim about evidence, not about confidence:
+## Symbol evidence status
 
-- **`verified`** — the DocC page resolves. Include the `docUrl`; CI re-fetches it.
-- **`apple-sourced`** — the spelling comes verbatim from an Apple code sample or chapter
-  text, but no doc page exists yet. Include `sourceUrl` and, where possible, `appleSample`.
-- **`conflicted`** — Apple's own materials disagree. Record both spellings in `conflict` and
-  say which is better attested. **Do not pick a winner** on the skill's own authority.
+`status` describes evidence, not confidence:
 
-Never upgrade `apple-sourced` to `verified` without a resolving URL. When the 27.1 docs land,
-that upgrade is the single most useful PR anyone can send.
+- **`verified`** — a current Apple DocC page resolves. Include `docUrl`.
+- **`apple-sourced`** — the spelling comes directly from Apple sample/chapter material but a
+  dedicated DocC page is not yet available. Include `sourceUrl` and supporting evidence.
+- **`conflicted`** — Apple's own material disagrees. Record the conflict and require active
+  SDK verification before an agent emits the symbol.
 
-## Before you open a PR
+Never promote `apple-sourced` to `verified` unless the documentation URL actually resolves.
+Never collapse a `conflicted` entry by preference.
+
+## Required local verification
+
+Before opening a pull request or publishing a change, run:
 
 ```bash
-bash skills/iphone-duo/scripts/verify-manifest.sh     # network; re-resolves every docUrl
-bash skills/iphone-duo/scripts/audit-duo.sh <a-swift-project>
-python3 -m json.tool skills/iphone-duo/data/api-manifest.json > /dev/null
+bash skills/iphone-duo/scripts/verify-all.sh
 ```
 
-CI runs the same checks plus `shellcheck`, and re-runs the manifest verification **weekly**
-so rot surfaces without anyone remembering to look.
+That deterministic offline suite validates:
 
-## Reporting an Apple change
+- Agent Skills structure and skill-directory identity;
+- shell syntax;
+- JSON parsing and manifest invariants;
+- the local manifest schema contract;
+- duplicate/stale symbol metadata;
+- Markdown/HTML relative links;
+- backticked reference filenames after renames;
+- SVG well-formedness and the no-vendored-raster policy;
+- `audit-duo.sh` against known-good and known-bad fixtures;
+- manifest coverage and research-date freshness.
 
-Open an issue with the **API change** template. Include the symbol, what changed, and the
-Apple URL. If `verify-manifest.sh` already fails for you, paste its output — that is the
-whole report.
+When changing Apple API evidence, also run:
 
-## Style
+```bash
+bash skills/iphone-duo/scripts/verify-all.sh --online
+```
 
-Reference files open with a one-line "Use this reference when…" trigger and close with
-`## Acceptance criteria` (or, in 03 and 05, a one-sentence "passes when" paragraph).
-Mid-file, the recurring sections are `## Audit checklist` and topic headings. Follow the
-file you are editing rather than inventing a new shape.
+The online pass re-resolves documented Apple symbols against developer.apple.com. Network
+failure is not evidence that a symbol is wrong; investigate before changing status.
 
-The reader is a language model under context pressure. Prefer a decidable test to a
-preference — "prefer X where appropriate" is not a rule an agent can act on. If you write a
-threshold, name the content that stops fitting below it.
+## Repository audit changes
 
-Terminology is fixed: **Tier 1/2/3**, **pose** (not posture), **partially open** (not
-partially folded), **hinge input** (not hinge state — "state" is reserved for app state).
+`data/patterns.json` is the only anti-pattern catalog. `audit-duo.sh` must not grow a second
+hardcoded list of regexes.
+
+A new pattern must specify:
+
+- stable category id;
+- title;
+- severity;
+- tier;
+- why it is risky;
+- recommended fix;
+- whether a Duo-ready application is expected to have zero hits.
+
+Remember that the scanner is heuristic. A grep match is a review candidate, not proof of a
+defect.
+
+## API examples
+
+`references/07-api-cookbook.md` is the code index. Keep full call sites there and use only
+short excerpts elsewhere. For beta or newly published APIs:
+
+1. verify spelling against the active SDK when available;
+2. record the evidence in the manifest;
+3. cite the Apple source and relevant timestamp/chapter;
+4. mark provisional signatures honestly;
+5. never invent a plausible replacement when compilation cannot confirm it.
+
+## Terminology
+
+Use these terms consistently:
+
+- **Tier 1 / Tier 2 / Tier 3**
+- **pose**, not posture
+- **partially open**, not partially folded
+- **hinge input**, not hinge state when referring to physical interaction
+- **application state** for navigation, selection, drafts, playback, filters, and other
+  durable user-task state
+
+The distinction matters because one of the core rules is that layout changes must not become
+application-state changes.
+
+## Writing style
+
+Write for an agent under context pressure. Prefer a decidable condition over a vague
+preference.
+
+Weak:
+
+```text
+Use a breakpoint when appropriate.
+```
+
+Better:
+
+```text
+Use a measured width threshold only when you can name the content that stops fitting below
+it and derive the threshold from that content.
+```
+
+Do not add hardware point-size constants merely because they appear to work on one simulator
+pose.
 
 ## Translations
 
-`docs/es/` and `docs/ko/` mirror the human-facing docs only. The skill itself stays English:
-it is consumed by agents and cites English Apple documentation, and a translated rule that
-drifts from the original is worse than no translation. When you change `README.md`
-substantively, note it in the PR so translations can follow.
+`docs/es/` and `docs/ko/` are human-facing summaries. The executable skill remains English so
+its API names and Apple-source citations remain canonical. When the English README changes
+materially, update the localized summaries in the same change.
 
-## Licensing
+## Licensing and Apple material
 
-Contributions are accepted under the [MIT License](LICENSE). Do not paste Apple
-documentation prose or commit Apple images — see [NOTICE.md](NOTICE.md).
+Contributions are accepted under the [MIT License](LICENSE). Do not paste substantial Apple
+documentation text or vendor Apple imagery into the repository. See [NOTICE.md](NOTICE.md).
