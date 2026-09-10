@@ -49,13 +49,13 @@ references (~20,000 tokens total) pulled in only when the task needs them. It te
 ```bash
 git clone https://github.com/eisenjimmy/iphone-duo-skill.git
 
-# Symlink so 'git pull' keeps the skill current (recommended)
-mkdir -p ~/.claude/skills
-ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.claude/skills/iphone-duo
+# Universal Agent Skills location; a symlink keeps 'git pull' updates live
+mkdir -p ~/.agents/skills
+ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.agents/skills/iphone-duo
 ```
 
 <details>
-<summary><b>Other agents and install locations</b></summary>
+<summary><b>Agent-specific install locations</b></summary>
 
 <br>
 
@@ -63,21 +63,17 @@ The skill is a plain directory. Point any Agent Skills-compatible harness at it:
 
 | Harness | Path |
 |---|---|
-| Claude Code (global) | `~/.claude/skills/iphone-duo` |
-| Claude Code (one project) | `<your-app>/.claude/skills/iphone-duo` ← usually what you want |
 | Codex | `~/.codex/skills/iphone-duo` |
 | Cursor / universal | `~/.agents/skills/iphone-duo` |
 
-Prefer the symlink above. If you copy instead, **replace rather than merge**, or renamed
-files linger:
+Prefer a symlink so repository updates propagate immediately. If you copy instead, **replace rather than merge**, or renamed files can linger:
 
 ```bash
-rm -rf ~/.claude/skills/iphone-duo
-cp -R iphone-duo-skill/skills/iphone-duo ~/.claude/skills/
+rm -rf ~/.agents/skills/iphone-duo
+cp -R iphone-duo-skill/skills/iphone-duo ~/.agents/skills/
 ```
 
-**Verify it loaded:** run `/skills` in Claude Code, or just ask — *"do you have the
-iphone-duo skill?"*
+**Verify it loaded:** use your harness's skill listing command when available, or ask the agent whether the `iphone-duo` skill is loaded.
 
 </details>
 
@@ -178,7 +174,7 @@ Here is a real transformation, and note that it uses **no Duo API at all**:
 +            SidebarList(model: model)
 +        } detail: {
 +            // 220 = the card's minimum readable width. Check the resulting
-            // column count is even at your target widths — Apple publishes no Duo point sizes.
++            // column count is even at your target widths — Apple publishes no Duo point sizes.
 +            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)]) {
 +                ForEach(model.items) { ItemCell(item: $0) }
 +            }
