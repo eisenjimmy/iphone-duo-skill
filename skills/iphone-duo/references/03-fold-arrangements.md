@@ -195,27 +195,30 @@ Do not encode device-specific layout logic around the arrangement.
 
 ### Overlay arrangement
 
-**Primary sits on top.** The HIG: *"the primary view moves atop the secondary view."* So the
-foreground surface — the player, the control layer — is the **primary**, and the thing behind
-it is the secondary. Getting this backwards buries the surface you meant to feature.
+Overlay has a precise structural rule: **the primary view is the foreground view when the
+arrangement is overlaying**. Apple's HIG describes the primary view as moving atop the
+secondary view. When the display becomes partially open, the views stop overlaying and move
+to occupy separate sides.
 
-**An overlay stops overlaying when partly folded.** *"When the display is partially folded,
-the views move to occupy each side; otherwise the primary view moves atop the secondary."*
-Never design an overlay assuming it always overlays. You can also collapse the secondary view
-when it should not appear at all.
-
-Use overlay when one view is foreground/supplementary to another and partial obscuration is acceptable:
+Do not infer primary/secondary ownership from generic product labels such as “player,”
+“controls,” or “queue.” Decide which surface should own the foreground role in the overlay
+state, make that surface primary, and keep those semantic roles stable across transitions.
+Apple's published example uses `UpNextView` as primary and `PlayerView` as secondary:
 
 ```swift
 NavigationStack {
     ArrangementView {
-        UpNextView()
+        UpNextView()      // primary: foreground while overlaying
     } secondary: {
-        PlayerView()
+        PlayerView()      // secondary: behind while overlaying
     }
     .arrangementViewStyle(.overlay)
 }
 ```
+
+The important rule is not that a particular product surface must always be primary; it is
+that **primary means foreground in overlay**, and the agent must choose that relationship
+intentionally.
 
 Apple's Tech Talk 111463 shows `overlayArrangementZIndex` as an environment value that lets a child adapt its internal representation when it is in front versus behind:
 
@@ -253,6 +256,7 @@ Prefer ordinary adaptive layout when:
 - Are inactive regions being used semantically rather than as a device detector?
 - Can displacement solve the issue locally?
 - Is an `ArrangementView` truly a two-part content experience?
+- Is primary/secondary ownership correct for the intended overlay foreground?
 - Is navigation outside the arrangement?
 - Is the arrangement outside scroll containers?
 - Is hinge data used only because the physical hinge matters?
@@ -262,4 +266,4 @@ Prefer ordinary adaptive layout when:
 
 ## Acceptance criteria
 
-This area passes when fold interference is handled with queried geometry and minimal displacement, arrangements are semantically justified, hinge data never substitutes for responsive layout, and the app remains fully functional without Duo-specific hardware signals.
+This area passes when fold interference is handled with queried geometry and minimal displacement, arrangements are semantically justified, overlay primary/secondary ownership is deliberate, hinge data never substitutes for responsive layout, and the app remains fully functional without Duo-specific hardware signals.
