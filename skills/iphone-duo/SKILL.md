@@ -8,7 +8,7 @@ description: >-
   scenes, scene accessories, camera direction coordination, or when removing
   UIScreen, UIDevice, orientation, fixed-width, or isDuo layout logic.
 compatibility: >-
-  Any Agent Skills-compatible coding agent (Claude Code, Codex, Cursor).
+  Any Agent Skills-compatible coding agent (Codex, Cursor, or compatible harnesses).
   Duo-only APIs require the iOS 27.1 SDK; the skill degrades to Tier 1 work
   when the active SDK is older.
 metadata:
