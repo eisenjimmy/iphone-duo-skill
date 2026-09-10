@@ -4,42 +4,43 @@
 
 <br>
 
-**Teach your coding agent to build one adaptive iPhone app that stays coherent in every pose.**
+**A source-backed Agent Skill for designing one adaptive iPhone app that remains coherent across every iPhone Duo pose.**
 
 <sub>English · [Español](docs/es/README.md) · [한국어](docs/ko/README.md)</sub>
 
-<img src="assets/meta.svg" alt="MIT licensed · 59 Apple symbols tracked · 34 doc-verified in CI · iOS 27.1 · Agent Skills format" width="100%">
+<img src="assets/meta.svg" alt="MIT licensed · source-backed Apple API manifest · iOS 27.1 · Agent Skills format" width="100%">
 
 </div>
 
 <br>
 
-<div align="center">
-<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/tile/Apple-iPhone-Duo-opening-iPhone-Duo-260909-lp.jpg.landing-big_2x.jpg" alt="iPhone Duo being opened, showing the inner display" width="82%">
-<br><sub>iPhone Duo · image © Apple Inc., served from apple.com — <a href="NOTICE.md">not redistributed here</a></sub>
-</div>
+## Why this exists
 
-<br>
+iPhone Duo introduces two displays, continuously changing window sizes, reserved regions,
+vertical system bars, a hinge, multiple scenes, and camera behavior that ordinary fixed-screen
+assumptions do not survive.
 
-## The problem
-
-iPhone Duo has two displays, five poses, a hinge, a fold that cuts through your layout, and
-two front cameras. Ask an agent to "add iPhone Duo support" and it will reach for the worst
-possible answer:
+The wrong adaptation is a second app hidden behind a device check:
 
 ```swift
-if isDuo { DuoDashboard() } else { Dashboard() }   // two UIs that immediately drift apart
+if isDuo {
+    DuoDashboard()
+} else {
+    Dashboard()
+}
 ```
 
-This skill stops that. It is a **rulebook**, not a library — about 3,300 tokens that always load, plus
-references (~20,000 tokens total) pulled in only when the task needs them. It teaches one idea:
+This skill teaches the opposite model:
 
 > **Layout reacts to available space. Physical interaction may react to the hinge.**
 
+Build one adaptive hierarchy first. Add Duo-specific APIs only when a physical Duo capability
+creates product value that ordinary adaptive layout cannot express.
+
 <br>
 
 <div align="center">
-<img src="assets/poses.svg" alt="The five iPhone Duo poses — closed, portrait, landscape, seated, standing — and the layout each implies" width="100%">
+<img src="assets/poses.svg" alt="The five iPhone Duo poses and the layout pressures they create" width="100%">
 </div>
 
 <br>
@@ -49,109 +50,52 @@ references (~20,000 tokens total) pulled in only when the task needs them. It te
 ```bash
 git clone https://github.com/eisenjimmy/iphone-duo-skill.git
 
-# Universal Agent Skills location; a symlink keeps 'git pull' updates live
 mkdir -p ~/.agents/skills
 ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.agents/skills/iphone-duo
 ```
 
-<details>
-<summary><b>Agent-specific install locations</b></summary>
-
-<br>
-
-The skill is a plain directory. Point any Agent Skills-compatible harness at it:
+Agent-specific locations:
 
 | Harness | Path |
 |---|---|
 | Codex | `~/.codex/skills/iphone-duo` |
 | Cursor / universal | `~/.agents/skills/iphone-duo` |
 
-Prefer a symlink so repository updates propagate immediately. If you copy instead, **replace rather than merge**, or renamed files can linger:
-
-```bash
-rm -rf ~/.agents/skills/iphone-duo
-cp -R iphone-duo-skill/skills/iphone-duo ~/.agents/skills/
-```
-
-**Verify it loaded:** use your harness's skill listing command when available, or ask the agent whether the `iphone-duo` skill is loaded.
-
-</details>
-
-<br>
+The skill itself is the directory `skills/iphone-duo/`. The canonical execution contract is
+[`SKILL.md`](skills/iphone-duo/SKILL.md).
 
 ## Use it
 
-Three prompts cover almost everything.
-
 ```text
-Use the iphone-duo skill to audit this repository. Don't change code yet.
-Give me evidence by file, a tier for each issue, and the smallest plan.
+Use the iphone-duo skill to audit this repository. Do not change code yet.
+Return file-level evidence, severity, tier, and the smallest coherent implementation plan.
 ```
 
 ```text
-Use the iphone-duo skill to adapt this app for iPhone Duo. Preserve navigation
-and view state during resizing. Finish Tier 1 before any Duo-only API.
+Use the iphone-duo skill to adapt this app for iPhone Duo.
+Preserve navigation and view state during resizing. Complete Tier 1 before Duo-only APIs.
 ```
 
 ```text
-Review this screen for partially-open iPhone Duo use: fold interference,
-reachability, and whether anything here should actually use the hinge.
+Review this screen for partially-open iPhone Duo use.
+Check fold interference, reachability, state continuity, and whether anything genuinely
+needs hinge input rather than ordinary responsive layout.
 ```
 
-### What a good run looks like
+## The execution model
 
-```text
-[P1  ] tier 1  Device-identity layout branch  (3 hits)  <-- must be zero
-         why  Layout must react to available space, not to which device it runs on.
-         fix  Size classes, container geometry, ViewThatFits/AnyLayout.
-           Sources/Dashboard.swift:44  if isDuo { DuoDashboard() } else { Dashboard() }
+Every change is classified before implementation:
 
-[P2  ] tier 2  Fixed grid column count  (1 hits)
-         why  Apple advises an EVEN column count so content divides across the fold.
-         fix  GridItem(.adaptive(minimum:)) sized to keep the count even.
-           Sources/Gallery.swift:31    count: 3
+| Tier | Purpose | Typical tools |
+|---|---|---|
+| **1 — universal adaptive** | Make the app correct at every available size | size classes, `NavigationSplitView`, adaptive grids, `ViewThatFits`, `AnyLayout`, safe areas, state continuity |
+| **2 — Duo-aware presentation** | Handle Duo geometry and side controls | reserved regions, displacement, `ArrangementView`, vertical bar behavior, overflow priority |
+| **3 — Duo-exclusive capability** | Use physical Duo hardware when it creates product value | hinge input, scene accessories, multiple scenes, camera direction coordination |
 
-VERDICT: material refactor needed — Device-identity layout branch (3)
-```
-
-> **If your Xcode predates 27.1** the agent marks Duo-only work `SDK-blocked` and stops
-> there. That is correct behavior, not a bug — Tier 1 still improves your app on every
-> device you already ship to.
+Tier 1 is mandatory groundwork. Mentioning iPhone Duo is not itself a reason to use Tier 2
+or Tier 3 APIs.
 
 <br>
-
-<div align="center">
-<img src="assets/workflow.svg" alt="How the agent works: scan, classify, plan, implement Tier 1 first, verify across poses" width="100%">
-</div>
-
-<br>
-
-## What it actually knows
-
-<div align="center">
-<img src="assets/reserved-regions.svg" alt="The three reserved regions: outer camera occlusion, inner camera occlusion, and the folding division region" width="100%">
-</div>
-
-<br>
-
-The fold is not a line you draw around. The system carves **reserved regions** out of your
-canvas — two camera *occlusions* and one folding *division* — and the difference matters:
-**occlusion covers, division splits.** Treating one as the other is the most common Duo
-layout bug, and it is the kind of thing an agent gets wrong silently.
-
-The skill also carries the parts of Apple's guidance that are easy to miss:
-
-- The inner display **in portrait keeps horizontal bars** — the one exception to side controls.
-- Vertical bars are **hardware-aligned**, so they **do not flip in right-to-left languages**.
-- In Split View each app puts controls on its **outer** edge.
-- Grids want an **even** column count so content divides cleanly across the fold.
-- Games may lock orientation but must **fill the screen** — change aspect ratio rather than letterbox.
-- `builtInDuoCamera` is a **deprecated iOS 10 alias for a rear camera**. It has nothing to
-  do with iPhone Duo, and it is the first thing an agent grepping for "Duo" will find.
-
-<br>
-
-## Three tiers, in order
 
 <div align="center">
 <img src="assets/tiers.svg" alt="Tier 1 universal adaptive, Tier 2 Duo-aware presentation, Tier 3 Duo-exclusive capability" width="100%">
@@ -159,133 +103,159 @@ The skill also carries the parts of Apple's guidance that are easy to miss:
 
 <br>
 
-Most "iPhone Duo support" is Tier 1 — work that improves every device you already ship to.
-Here is a real transformation, and note that it uses **no Duo API at all**:
+## What the skill enforces
 
-```diff
--        if isDuo && !isFolded {
--            LazyVGrid(columns: Array(repeating: GridItem(.fixed(200)), count: 3)) { … }
--                .environmentObject(wideVM)
--        } else {
--            List { … }.environmentObject(compactVM)
--                .frame(width: UIScreen.main.bounds.width)
--        }
-+        NavigationSplitView {
-+            SidebarList(model: model)
-+        } detail: {
-+            // 220 = the card's minimum readable width. Check the resulting
-+            // column count is even at your target widths — Apple publishes no Duo point sizes.
-+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)]) {
-+                ForEach(model.items) { ItemCell(item: $0) }
-+            }
-+        }
+The high-value rules are intentionally strict:
+
+- **No device-identity layout tree.** Never use `isDuo`, model identity, display identity, or idiom as an ordinary layout switch.
+- **No hinge-driven layout.** Hinge input belongs to physical interaction and effects; columns, navigation, sidebars, and grid density belong to available space and reserved regions.
+- **No duplicated application state.** Navigation, selection, drafts, playback, filters, and focus must survive resizing and display transitions.
+- **No guessed hardware dimensions.** Apple does not publish a stable logical point-size contract for app layout. Query the environment.
+- **No fold-obscured critical content.** Buttons, QR codes, drag handles, important labels, and image focal points must clear active reserved regions.
+- **No invented SDK symbols.** If a symbol is absent from the manifest or unavailable in the active SDK, report `SDK-blocked` instead of improvising.
+- **No independent inner/outer display canvases.** Use scenes and scene accessories for system-managed multi-display experiences.
+
+## Reserved regions are not safe areas
+
+<div align="center">
+<img src="assets/reserved-regions.svg" alt="Camera occlusion regions and the folding division region" width="100%">
+</div>
+
+The skill keeps three concepts separate:
+
+```text
+safe areas       → system UI and edge protection
+reserved regions → physical/system regions inside otherwise usable geometry
+hinge input       → live physical motion for interaction/effects
 ```
 
-<br>
+The folding region is a **division** region. Camera regions are **occlusion** regions.
+That distinction determines whether content should be split, displaced, or simply kept clear.
 
-## Why you can trust it
+## Bars and navigation
 
-Skills that encode a beta SDK rot quietly, then confidently hand an agent a symbol that
-never existed. This one is built so that cannot happen silently.
+Duo can move system controls to a vertical edge. The skill therefore prefers semantic
+system navigation and toolbar APIs over hand-built bars. It also encodes less obvious Apple
+guidance: the inner display in portrait retains horizontal bars, Split View puts each app's
+controls on its outer edge, vertical bar placement is hardware-aligned rather than mirrored
+for RTL, and overflow/visibility priority matters when vertical space is constrained.
 
-Every Apple symbol lives in **[`data/api-manifest.json`](skills/iphone-duo/data/api-manifest.json)**
-with a status the prose is not allowed to overstate:
+## Arrangements
 
-| Status | Meaning | Count |
-|---|---|---|
-| `verified` | Apple's documentation page resolves right now | **34** |
-| `apple-sourced` | Verbatim from an Apple code sample; no doc page yet (iOS 27.1) | **23** |
-| `conflicted` | Apple's own materials disagree on the spelling | **2** |
+`ArrangementView` is for **two related surfaces**, not app navigation. Split arrangement is
+appropriate when both surfaces deserve dedicated space. Overlay arrangement has a precise
+semantic rule: **the primary view is the foreground view while overlaying**; when Duo is
+partially open, the system may move the surfaces apart. The agent must choose primary and
+secondary intentionally rather than inferring those roles from names like “player” or “queue.”
+
+## Scenes, hinge, and camera
+
+Tier 3 guidance covers:
+
+- side-by-side multitasking as a first-class layout state;
+- multiple scene ownership and scene-local versus shared state;
+- scene accessories as supplementary, availability-dependent UI;
+- `onHingeChange` only for genuine physical interaction;
+- virtual front-camera preference when it satisfies the product requirement;
+- `AVCaptureDeviceDirectionCoordinator` for view-relative physical camera direction;
+- rotation, mirroring, preview geometry, and camera-driven reserved-region changes.
+
+## A factual layer agents cannot casually overstate
+
+All Apple symbols named by the skill live in
+[`data/api-manifest.json`](skills/iphone-duo/data/api-manifest.json). The manifest classifies
+evidence as:
+
+| Status | Meaning |
+|---|---|
+| `verified` | A current Apple DocC page resolves for the symbol |
+| `apple-sourced` | The spelling comes from Apple sample/chapter material but the dedicated DocC page is not yet available |
+| `conflicted` | Apple's own materials disagree; the agent must verify against the active SDK before emitting code |
+
+The manifest is governed by
+[`api-manifest.schema.json`](skills/iphone-duo/data/api-manifest.schema.json), and reference
+files are not allowed to invent symbols outside that factual layer.
+
+## Verify the repository locally
+
+Run the deterministic suite before publishing changes:
 
 ```bash
-bash skills/iphone-duo/scripts/verify-manifest.sh
+# Offline: structure, schema contract, JSON, shell syntax, links, assets,
+# audit self-test, manifest coverage and staleness.
+bash skills/iphone-duo/scripts/verify-all.sh
+
+# Also re-resolve documented Apple symbols against developer.apple.com.
+bash skills/iphone-duo/scripts/verify-all.sh --online
 ```
 
-Re-resolves every documented symbol against developer.apple.com, fails if a reference file
-names a symbol the manifest doesn't have, and **expires itself** after 45 days so a stale
-research date becomes a red CI run instead of a quiet lie. It runs weekly in CI.
-
-The audit script owns no patterns of its own either — it executes
-[`data/patterns.json`](skills/iphone-duo/data/patterns.json), so there is exactly one place
-to add a rule:
+For an app audit:
 
 ```bash
 bash skills/iphone-duo/scripts/audit-duo.sh ~/code/MyApp
 ```
 
-<br>
-
-## Sources
-
-Everything here traces to Apple. Nothing is invented; the two `conflicted` entries exist
-because Apple's own materials disagree, and the skill says so rather than picking a winner.
-
-<table>
-<tr>
-<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111466/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11309/11309_wide_250x141_2x.jpg" width="100%"><br><sub><b>Design for iPhone Duo</b></sub></a></td>
-<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111461/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11312/11312_wide_250x141_2x.jpg" width="100%"><br><sub><b>Prepare your app</b></sub></a></td>
-<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111462/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11313/11313_wide_250x141_2x.jpg" width="100%"><br><sub><b>Raise the bar</b></sub></a></td>
-</tr>
-<tr>
-<td align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111463/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11314/11314_wide_250x141_2x.jpg" width="100%"><br><sub><b>Strike a pose</b></sub></a></td>
-<td align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111464/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11315/11315_wide_250x141_2x.jpg" width="100%"><br><sub><b>Displays and scenes</b></sub></a></td>
-<td align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111465/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11316/11316_wide_250x141_2x.jpg" width="100%"><br><sub><b>Camera experience</b></sub></a></td>
-</tr>
-</table>
-
-Plus the [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo)
-and [Apple's iPhone Duo developer hub](https://developer.apple.com/iphone-duo/).
-Full provenance: [`references/08-sources.md`](skills/iphone-duo/references/08-sources.md).
-
-<br>
-
-## What's inside
-
-```text
-skills/iphone-duo/
-├── SKILL.md                   always loaded · ~3,300 tokens
-├── data/
-│   ├── api-manifest.json      ← the only authority on whether a symbol is real
-│   └── patterns.json          ← the only list of anti-patterns
-├── scripts/
-│   ├── audit-duo.sh           executes patterns.json against a codebase
-│   └── verify-manifest.sh     re-resolves every symbol; expires after 45 days
-└── references/                loaded on demand · ~20,000 tokens total, 1.7k–4.1k each
-    ├── 01-design-and-layout.md          Tier 1
-    ├── 02-bars-and-navigation.md        Tier 1
-    ├── 03-fold-arrangements.md          Tier 2
-    ├── 04-hardware-scenes-hinge.md      Tier 3
-    ├── 05-camera.md                     domain
-    ├── 06-testing-and-review.md         process
-    ├── 07-api-cookbook.md               all code lives here
-    └── 08-sources.md                    provenance
-```
-
-<br>
-
-## What this is not
-
-A library. It ships no Swift you can link against. It changes how an agent *reasons* about
-your code — the output is your codebase, improved.
-
-<br>
-
-## Contributing
-
-Apple's iPhone Duo documentation is still landing. **Corrections are the most valuable
-contribution here** — if a symbol got renamed or the HIG changed, open an issue and CI will
-usually already agree with you.
-
-[Contributing guide](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
+The audit is deliberately heuristic. It identifies candidates and severity; the agent still
+has to inspect whether a match actually controls layout.
 
 <br>
 
 <div align="center">
-<sub>
+<img src="assets/workflow.svg" alt="Scan, classify, plan, implement Tier 1 first, then verify across poses" width="100%">
+</div>
 
-[MIT](LICENSE) · Not affiliated with Apple Inc. · [Trademarks and image attribution](NOTICE.md)
+<br>
+
+## Repository structure
+
+```text
+skills/iphone-duo/
+├── SKILL.md                         canonical agent contract
+├── data/
+│   ├── api-manifest.json            source-of-truth Apple symbol inventory
+│   ├── api-manifest.schema.json     manifest structural contract
+│   └── patterns.json                source-of-truth audit anti-patterns
+├── scripts/
+│   ├── audit-duo.sh                 repository readiness scanner
+│   ├── verify-all.sh                deterministic local quality gate
+│   └── verify-manifest.sh           Apple evidence/freshness verifier
+└── references/
+    ├── 01-design-and-layout.md
+    ├── 02-bars-and-navigation.md
+    ├── 03-fold-arrangements.md
+    ├── 04-hardware-scenes-hinge.md
+    ├── 05-camera.md
+    ├── 06-testing-and-review.md
+    ├── 07-api-cookbook.md
+    └── 08-sources.md
+```
+
+## Source hierarchy
+
+When sources disagree, the skill uses this order:
+
+1. active SDK/compiler reality;
+2. current Apple API documentation;
+3. current Apple Human Interface Guidelines;
+4. current Apple Tech Talks and sample code;
+5. this repository's synthesis;
+6. third-party examples.
+
+Primary Apple material is indexed in
+[`references/08-sources.md`](skills/iphone-duo/references/08-sources.md), including the iPhone
+Duo HIG and all six launch Tech Talks.
+
+## Scope
+
+This repository is a **reasoning and implementation skill**, not a Swift package. It does
+not ship runtime code into your application. It teaches a coding agent how to audit, plan,
+implement, and verify Duo adaptation without fragmenting the product into device-specific UI.
+
+## Contributing
+
+Corrections are more valuable than additional prose while the iOS 27.1 API surface is still
+settling. See [CONTRIBUTING.md](CONTRIBUTING.md) for the evidence and verification contract.
+
+[MIT](LICENSE) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Trademark/image notice](NOTICE.md)
 
 Prior art: [FloWritesCode/fwc-swiftui-skills](https://github.com/FloWritesCode/fwc-swiftui-skills)
-
-</sub>
-</div>
