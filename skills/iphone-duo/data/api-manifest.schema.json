@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/eisenjimmy/iphone-duo-skill/blob/main/skills/iphone-duo/data/api-manifest.schema.json",
+  "title": "iPhone Duo API Manifest",
+  "description": "Structural contract for the Apple API evidence manifest consumed by the iphone-duo agent skill.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestVersion",
+    "researchDate",
+    "staleAfterDays",
+    "note",
+    "statusLegend",
+    "sdkTimeline",
+    "symbols"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "manifestVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "researchDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "staleAfterDays": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statusLegend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verified", "apple-sourced", "conflicted"],
+      "properties": {
+        "verified": { "type": "string", "minLength": 1 },
+        "apple-sourced": { "type": "string", "minLength": 1 },
+        "conflicted": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sdkTimeline": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["runsUnrecompiled", "iOS27SDK", "iOS27_1SDK", "toolchain", "simulator", "source"],
+      "properties": {
+        "runsUnrecompiled": { "type": "string", "minLength": 1 },
+        "iOS27SDK": { "type": "string", "minLength": 1 },
+        "iOS27_1SDK": { "type": "string", "minLength": 1 },
+        "toolchain": { "type": "string", "minLength": 1 },
+        "simulator": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "string",
+          "pattern": "^https://developer\\.apple\\.com/"
+        }
+      }
+    },
+    "symbols": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/symbol" }
+    }
+  },
+  "$defs": {
+    "symbol": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "name",
+        "framework",
+        "kind",
+        "status",
+        "availability",
+        "duoExclusive",
+        "usedIn"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "framework": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["verified", "apple-sourced", "conflicted"]
+        },
+        "availability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duoExclusive": {
+          "type": "boolean"
+        },
+        "declaration": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "docUrl": {
+          "type": "string",
+          "pattern": "^https://developer\\.apple\\.com/"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "pattern": "^https://developer\\.apple\\.com/"
+        },
+        "appleQuote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "appleSample": {
+          "type": ["string", "object", "array"]
+        },
+        "note": {
+          "type": "string"
+        },
+        "conflict": {
+          "type": ["string", "object", "array"]
+        },
+        "usedIn": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{2}-[a-z0-9-]+\\.md$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "verified" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["docUrl"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "apple-sourced" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["sourceUrl"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "conflicted" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["conflict"]
+          }
+        }
+      ]
+    }
+  }
+}
