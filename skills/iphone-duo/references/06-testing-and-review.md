@@ -17,6 +17,24 @@ repository architecture
 → hinge/multidisplay/camera specializations
 ```
 
+## Step 0 — Verify the skill repository when editing the skill itself
+
+Before trusting a modified copy of this repository, run:
+
+```bash
+bash skills/iphone-duo/scripts/verify-all.sh
+```
+
+When Apple API evidence changed, also run:
+
+```bash
+bash skills/iphone-duo/scripts/verify-all.sh --online
+```
+
+The local quality gate checks the manifest/schema contract, stale reference filenames,
+relative links, shell syntax, audit fixtures, assets, and evidence freshness. This is separate
+from testing an application that consumes the skill.
+
 ## Step 1 — Establish environment
 
 Record:
@@ -35,13 +53,15 @@ custom rendering/layout frameworks
 
 Do not report an iOS 27.1 API as “implemented and verified” if the current SDK cannot compile it.
 
-Use these verification labels:
+Use these verification labels exactly:
 
-- **verified** — built/tested in current environment;
-- **compile-verified only** — builds but Duo simulator behavior not exercised;
-- **design-verified** — architecture reviewed against Apple guidance but not compiled;
-- **SDK-blocked** — documented API not present in active SDK;
-- **deferred** — intentionally not implemented.
+- **verified** — the relevant behavior was executed and observed in the stated environment;
+- **compile-verified only** — the code builds, but the claimed runtime/Duo behavior was not exercised;
+- **design-verified** — architecture/code was reviewed against source-backed guidance, but nothing was executed;
+- **SDK-blocked** — the required symbol is unavailable in the active SDK;
+- **deferred** — intentionally not implemented or tested, with the dependency/reason stated.
+
+Compilation alone never earns `verified`.
 
 ## Step 2 — Run heuristic scan
 
@@ -172,7 +192,7 @@ Compile and exercise the affected flows after each batch.
 
 ## Duo test matrix
 
-When Device Hub / Duo simulator is available, cover at least these states.
+When Device Hub / the iPhone Duo simulator is available, cover at least these states.
 
 ### Display/pose
 
@@ -372,7 +392,7 @@ After changing code, report:
 - command / target / result
 
 ## Behavioral verification
-- widths/poses exercised
+- widths/poses exercised and observed result
 
 ## Deferred
 - reason and dependency
@@ -381,7 +401,8 @@ After changing code, report:
 - concrete, evidence-based only
 ```
 
-Never claim simulator validation if only static code review was performed.
+Never claim simulator validation if only static code review was performed, and never collapse
+`compile-verified only` into `verified`.
 
 ## Definition of done
 
