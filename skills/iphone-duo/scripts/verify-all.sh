@@ -71,8 +71,8 @@ manifest = json.loads(manifest_path.read_text())
 schema = json.loads(schema_path.read_text())
 patterns = json.loads(patterns_path.read_text())
 
-# The schema is deliberately dependency-free at verification time. Enforce the
-# contract that matters operationally; editors can use the JSON Schema itself.
+# The schema is dependency-free at verification time. Enforce the operational
+# contract here; editors and external validators can consume the JSON Schema.
 required_top = {
     "manifestVersion", "researchDate", "staleAfterDays", "note",
     "statusLegend", "sdkTimeline", "symbols"
@@ -133,12 +133,16 @@ print("  contract ok")
 PY
 
 echo
-echo "[markdown links + asset policy]"
-python3 - "$ROOT" <<'PY'
+echo "[links + prose references + asset policy]"
+python3 - "$ROOT" "$SKILL/references" <<'PY'
 import pathlib, re, sys, xml.dom.minidom
 root = pathlib.Path(sys.argv[1])
+refs_dir = pathlib.Path(sys.argv[2])
 md_link = re.compile(r'\[[^\]]*\]\(([^)#]+?)(?:#[^)]*)?\)')
 html_link = re.compile(r'(?:src|href)="([^"#]+?)(?:#[^"]*)?"')
+# Reference filenames often appear as prose code spans rather than Markdown
+# links. Those must be checked too or renames can silently leave stale advice.
+ref_literal = re.compile(r'`((?:\.{0,2}/)?[0-9]{2}-[a-z0-9-]+\.md)`')
 broken = []
 markdown = list(root.rglob("*.md"))
 for f in markdown:
@@ -152,8 +156,12 @@ for f in markdown:
                 continue
             if not (f.parent / target).exists():
                 broken.append(f"{f.relative_to(root)} -> {target}")
+    for target in ref_literal.findall(text):
+        name = pathlib.Path(target).name
+        if not (refs_dir / name).exists():
+            broken.append(f"{f.relative_to(root)} -> stale reference literal {target}")
 if broken:
-    print("broken relative links:")
+    print("broken/stale references:")
     for item in sorted(set(broken)):
         print("  ", item)
     raise SystemExit(1)
@@ -166,7 +174,7 @@ raster = [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in rast
 if raster:
     raise SystemExit("raster assets are not permitted: " + ", ".join(str(p.relative_to(root)) for p in raster))
 
-print(f"  {len(markdown)} markdown files: relative links ok")
+print(f"  {len(markdown)} markdown files: links and reference literals ok")
 print("  SVG well-formed; no vendored raster imagery")
 PY
 
