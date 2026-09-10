@@ -1,5 +1,5 @@
 {
-  "patternsVersion": "2.0.0",
+  "patternsVersion": "2.1.0",
   "note": "Canonical enumeration of Duo-hostile code patterns. This file is the SINGLE SOURCE OF TRUTH. scripts/audit-duo.sh consumes it; SKILL.md and references/06 point at it instead of re-listing regexes. Add a pattern here and every consumer picks it up.",
   "categories": [
     {
@@ -81,6 +81,16 @@
       "fix": "reservedRegions(kind:) and ArrangementView for layout; keep onHingeChange for physical interaction only.",
       "expectZeroInDuoReadyApp": false,
       "patterns": ["hinge.*(showSidebar|columns|layout|collapse)", "angle\\s*[<>]=?\\s*[0-9]+.*\\b(layout|column|sidebar)", "status\\s*==\\s*\\.partiallyOpen.*layout"]
+    },
+    {
+      "id": "legacy-duo-camera-false-friend",
+      "title": "Legacy builtInDuoCamera false friend",
+      "severity": "P1",
+      "tier": 3,
+      "why": "AVCaptureDevice.DeviceType.builtInDuoCamera is a deprecated iOS 10 alias for the rear dual camera and has no relationship to iPhone Duo. Its name makes it especially likely to be adopted incorrectly by code-generation agents.",
+      "fix": "For ordinary user-facing capture, discover the virtual front camera. For explicit Duo physical-camera control, use the manifested iOS 27.1 camera types and AVCaptureDeviceDirectionCoordinator after SDK verification.",
+      "expectZeroInDuoReadyApp": true,
+      "patterns": ["builtInDuoCamera"]
     },
     {
       "id": "duo-api-surface",
