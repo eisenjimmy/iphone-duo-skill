@@ -46,6 +46,14 @@ test -f "$AUDIT"
 test -f "$VERIFY_MANIFEST"
 name="$(awk '/^name:/{print $2; exit}' "$SKILL/SKILL.md")"
 [ "$name" = "iphone-duo" ] || { echo "SKILL.md name '$name' != directory 'iphone-duo'"; exit 1; }
+line_count="$(wc -l < "$SKILL/SKILL.md" | tr -d ' ')"
+[ "$line_count" -lt 500 ] || { echo "SKILL.md is $line_count lines; Agent Skills recommends keeping it under 500"; exit 1; }
+if command -v skills-ref >/dev/null 2>&1; then
+  skills-ref validate "$SKILL"
+  echo "  skills-ref validation ok"
+else
+  echo "  skills-ref not installed — structural validation completed locally"
+fi
 echo "  ok"
 
 echo
@@ -62,7 +70,7 @@ else
 fi
 
 echo
-echo "[json + manifest contract]"
+echo "[json + manifest + audit contracts]"
 python3 - "$MANIFEST" "$SCHEMA" "$PATTERNS" "$SKILL/references" <<'PY'
 import datetime, json, pathlib, re, sys
 
@@ -121,15 +129,41 @@ for i, symbol in enumerate(manifest["symbols"]):
     if symbol["status"] == "conflicted" and not symbol.get("conflict"):
         raise SystemExit(f"{where} conflicted symbols require conflict")
 
-if not isinstance(patterns.get("categories"), list) or not patterns["categories"]:
-    raise SystemExit("patterns.json must contain categories")
-pattern_ids = [c.get("id") for c in patterns["categories"]]
-if None in pattern_ids or len(pattern_ids) != len(set(pattern_ids)):
-    raise SystemExit("pattern category ids must be present and unique")
+if not re.fullmatch(r"\d+\.\d+\.\d+", patterns.get("patternsVersion", "")):
+    raise SystemExit("patternsVersion must be semver")
+categories = patterns.get("categories")
+if not isinstance(categories, list) or not categories:
+    raise SystemExit("patterns.json must contain a non-empty categories array")
+pattern_ids = []
+required_category = {"id", "title", "severity", "tier", "why", "fix", "expectZeroInDuoReadyApp", "patterns"}
+allowed_severity = {"P0", "P1", "P2", "P3", "info"}
+for i, category in enumerate(categories):
+    where = f"categories[{i}]"
+    missing = sorted(required_category - category.keys())
+    if missing:
+        raise SystemExit(f"{where} missing fields: {missing}")
+    if category["severity"] not in allowed_severity:
+        raise SystemExit(f"{where}.severity invalid: {category['severity']}")
+    if category["tier"] not in (1, 2, 3):
+        raise SystemExit(f"{where}.tier must be 1, 2, or 3")
+    if not isinstance(category["expectZeroInDuoReadyApp"], bool):
+        raise SystemExit(f"{where}.expectZeroInDuoReadyApp must be boolean")
+    if not isinstance(category["patterns"], list) or not category["patterns"]:
+        raise SystemExit(f"{where}.patterns must be a non-empty array")
+    if len(category["patterns"]) != len(set(category["patterns"])):
+        raise SystemExit(f"{where}.patterns contains duplicates")
+    for expression in category["patterns"]:
+        try:
+            re.compile(expression)
+        except re.error as exc:
+            raise SystemExit(f"{where} invalid regex {expression!r}: {exc}")
+    pattern_ids.append(category["id"])
+if len(pattern_ids) != len(set(pattern_ids)):
+    raise SystemExit("pattern category ids must be unique")
 
 print(f"  manifest: {len(manifest['symbols'])} symbols, {len(ids)} unique ids")
-print(f"  patterns: {len(pattern_ids)} categories")
-print("  contract ok")
+print(f"  patterns: {len(pattern_ids)} valid categories")
+print("  contracts ok")
 PY
 
 echo
