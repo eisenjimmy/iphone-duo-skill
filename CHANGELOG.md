@@ -4,6 +4,30 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 the skill itself is versioned in `SKILL.md` frontmatter.
 
+## [Unreleased]
+
+### Added
+
+- **`data/api-manifest.schema.json`** — a real JSON Schema contract for the manifest's
+  top-level structure, symbol evidence states, URL provenance, and reference ownership.
+- **`scripts/verify-all.sh`** — one deterministic local quality gate covering structure,
+  shell syntax, JSON/manifest invariants, schema presence, duplicate IDs, stale `usedIn`
+  entries, relative links, backticked reference filenames, SVG validity, raster policy,
+  audit self-tests, freshness, and optional live Apple documentation verification.
+
+### Fixed
+
+- Corrected a stale camera reference from the retired `04-scenes-and-multidisplay.md` name
+  to `04-hardware-scenes-hinge.md`.
+- Tightened overlay-arrangement semantics: the **primary view is the foreground view while
+  overlaying**. Product labels such as player/queue no longer imply primary/secondary role;
+  ownership follows the intended foreground relationship and Apple's published example.
+- Removed hardcoded verification counts from the repository presentation layer so the README
+  and metadata banner cannot silently drift from the manifest inventory.
+- Reworked English, Korean, and Spanish entry documentation around the same canonical skill,
+  tier model, schema-backed factual layer, and local verification path.
+- Added the local quality gate to `AGENTS.md` and made it the contribution contract.
+
 ## [2.1.0] — 2026-09-10
 
 The release that made the skill's factual layer machine-checkable.
@@ -12,17 +36,17 @@ The release that made the skill's factual layer machine-checkable.
 
 - **`data/api-manifest.json`** — the single source of truth for every Apple symbol the
   skill names. 50 symbols, each graded `verified` (Apple's doc page resolves),
-  `apple-sourced` (verbatim from an Apple sample, no doc page yet), or `conflicted`
+  `apple-sourced` (verbatim from an Apple sample, no doc page yet) or `conflicted`
   (Apple's own materials disagree). Prose is no longer allowed to assert a symbol the
   manifest doesn't carry.
 - **`data/patterns.json`** — the single source of truth for Duo-hostile code patterns,
   with severity, tier, cause and fix. Ten categories, 76 patterns.
 - **`scripts/verify-manifest.sh`** — re-resolves every documented symbol against
-  developer.apple.com, fails if a reference file names an unmanifested symbol, and
-  **expires the research date after 45 days** so staleness becomes a red build.
-- **CI** — structure, JSON, SVG well-formedness, shellcheck, an `audit-duo.sh` self-test
-  against good and bad fixtures, internal link checking, and a guard that no Apple raster
-  image is ever committed. The manifest check also runs weekly on a schedule.
+  developer.apple.com, fails on unmanifested symbols or stale usedIn paths, and
+  **expires the research date after 45 days** so staleness becomes visible instead of
+  silently accumulating.
+- Automated structure, JSON, SVG, shell, audit-fixture, internal-link, and Apple-image
+  policy checks around the factual layer.
 - **Apple's verbatim code samples**, cited by Tech Talk and timestamp, replacing
   paraphrased snippets throughout `references/07-api-cookbook.md`.
 - Open-source scaffolding: `LICENSE` (MIT), `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
