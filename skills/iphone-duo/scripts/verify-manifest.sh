@@ -3,7 +3,7 @@
 #
 #   1. the research snapshot is inside its staleness budget
 #   2. every `docUrl` in data/api-manifest.json still resolves at Apple
-#   3. every Duo symbol named in the prose exists in the manifest
+#   3. every Apple-shaped API symbol named in SKILL.md or references exists in the manifest
 #   4. every `usedIn` filename still exists
 #
 # The watchlist for (3) is DERIVED FROM THE MANIFEST — this script owns no
@@ -16,12 +16,14 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL="$(dirname "$HERE")"
 MANIFEST="$SKILL/data/api-manifest.json"
 REFS="$SKILL/references"
+CORE="$SKILL/SKILL.md"
 OFFLINE="${OFFLINE:-0}"
 fail=0
 
 command -v python3 >/dev/null || { echo "python3 required"; exit 2; }
 [ -f "$MANIFEST" ] || { echo "missing manifest: $MANIFEST"; exit 2; }
 [ -d "$REFS" ]     || { echo "missing references: $REFS"; exit 2; }
+[ -f "$CORE" ]     || { echo "missing core skill: $CORE"; exit 2; }
 
 echo "iPhone Duo skill — manifest verification"
 echo "========================================"
@@ -78,11 +80,13 @@ fi
 
 # ------------------------------------------- prose symbols exist in manifest
 echo
-echo "[coverage] Duo symbols named in references/ must exist in the manifest"
-run_check "$MANIFEST" "$REFS" <<'PY'
+echo "[coverage] Apple-shaped symbols in SKILL.md and references/ must exist in the manifest"
+run_check "$MANIFEST" "$CORE" "$REFS" <<'PY'
 import json, sys, re, pathlib
 
 m = json.load(open(sys.argv[1]))
+core = pathlib.Path(sys.argv[2])
+refs = pathlib.Path(sys.argv[3])
 
 # The watchlist is derived from the manifest, not hand-maintained here.
 known = set()
@@ -105,7 +109,7 @@ CANDIDATE = re.compile(
     r"`([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*(?:\([^`]*\))?)`"
 )
 APPLEISH = re.compile(
-    r"^(UI[A-Z]|AV[A-Z]|NS[A-Z])"                       # framework-prefixed types
+    r"^(UI[A-Z]|AV[A-Z]|NS[A-Z])"
     r"|^(Toolbar|Scene|Arrangement|Reserved|Camera|Hinge|Concentric|Navigation|Tab)[A-Z]"
     r"|^(on|toolbar|scene|arrangement|reserved|camera|hinge|axis|vertical|visibility|default|overlay|dynamic)[A-Z]"
 )
@@ -114,11 +118,12 @@ ALLOWED_ANTIPATTERNS = {
     "UIScreen.main", "UIScreen", "UIScreen.main.bounds", "UIScreen.main.scale",
     "UIScreen.screens", "UIDevice.current.userInterfaceIdiom", "UIDevice",
     "UIToolbar", "UINavigationBar", "UITabBar",
-    "AVCaptureDeviceRotationCoordinator",   # the Obj-C spelling, called out as wrong
+    "AVCaptureDeviceRotationCoordinator",
 }
 
+files = [core, *sorted(refs.glob("*.md"))]
 missing = {}
-for f in sorted(pathlib.Path(sys.argv[2]).glob("*.md")):
+for f in files:
     for n, line in enumerate(f.read_text().splitlines(), 1):
         for sym in CANDIDATE.findall(line):
             base = sym.split("(")[0]
@@ -137,7 +142,7 @@ if missing:
         print(f"    {s}  ->  {locs[0]}{extra}")
     print("\n  Add them to data/api-manifest.json, or stop naming them.")
     sys.exit(1)
-print(f"  ok — every Apple-shaped symbol in references/ is manifested ({len(known)} known names)")
+print(f"  ok — every Apple-shaped symbol in SKILL.md + references/ is manifested ({len(known)} known names)")
 PY
 
 # ------------------------------------------- usedIn points at real files
