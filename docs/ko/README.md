@@ -49,13 +49,13 @@ if isDuo { DuoDashboard() } else { Dashboard() }   // 곧바로 벌어지는 두
 ```bash
 git clone https://github.com/eisenjimmy/iphone-duo-skill.git
 
-# 심볼릭 링크로 연결하면 'git pull'만으로 스킬이 최신 상태를 유지합니다 (권장)
-mkdir -p ~/.claude/skills
-ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.claude/skills/iphone-duo
+# 범용 Agent Skills 경로. 심볼릭 링크를 사용하면 'git pull' 업데이트가 바로 반영됩니다.
+mkdir -p ~/.agents/skills
+ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.agents/skills/iphone-duo
 ```
 
 <details>
-<summary><b>다른 에이전트 및 설치 경로</b></summary>
+<summary><b>에이전트별 설치 경로</b></summary>
 
 <br>
 
@@ -63,21 +63,17 @@ ln -sfn "$PWD/iphone-duo-skill/skills/iphone-duo" ~/.claude/skills/iphone-duo
 
 | 도구 | 경로 |
 |---|---|
-| Claude Code (전역) | `~/.claude/skills/iphone-duo` |
-| Claude Code (프로젝트 단위) | `<앱-저장소>/.claude/skills/iphone-duo` ← 보통 이쪽을 권장 |
 | Codex | `~/.codex/skills/iphone-duo` |
 | Cursor / 범용 | `~/.agents/skills/iphone-duo` |
 
-위의 심볼릭 링크 방식을 권장합니다. 복사한다면 **병합이 아니라 교체**해야 합니다.
-그러지 않으면 이름이 바뀐 파일이 남습니다.
+저장소 업데이트가 즉시 반영되도록 심볼릭 링크 사용을 권장합니다. 복사한다면 **병합이 아니라 교체**해야 합니다. 그러지 않으면 이름이 바뀐 파일이 남을 수 있습니다.
 
 ```bash
-rm -rf ~/.claude/skills/iphone-duo
-cp -R iphone-duo-skill/skills/iphone-duo ~/.claude/skills/
+rm -rf ~/.agents/skills/iphone-duo
+cp -R iphone-duo-skill/skills/iphone-duo ~/.agents/skills/
 ```
 
-**로드 확인:** Claude Code에서 `/skills`를 실행하거나, 그냥 물어보세요 —
-*"iphone-duo 스킬 있어?"*
+**로드 확인:** 사용하는 도구가 스킬 목록 명령을 제공하면 해당 명령을 사용하거나, 에이전트에게 `iphone-duo` 스킬이 로드되었는지 확인하세요.
 
 </details>
 
@@ -179,7 +175,7 @@ VERDICT: material refactor needed — Device-identity layout branch (3)
 +            SidebarList(model: model)
 +        } detail: {
 +            // 220 = 카드의 최소 가독 너비. 결과 열 개수가 짝수인지 직접 확인하세요 —
-            // Apple은 Duo의 포인트 크기를 공개하지 않습니다.
++            // Apple은 Duo의 포인트 크기를 공개하지 않습니다.
 +            LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)]) {
 +                ForEach(model.items) { ItemCell(item: $0) }
 +            }
