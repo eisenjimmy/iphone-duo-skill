@@ -10,7 +10,7 @@ body:
     id: harness
     attributes:
       label: Agent and model
-      placeholder: "Claude Code, Opus"
+      placeholder: "e.g. Codex, Cursor, or your harness + model"
     validations: { required: true }
   - type: textarea
     id: prompt

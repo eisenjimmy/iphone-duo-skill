@@ -1,6 +1,6 @@
 {
   "$schema": "./api-manifest.schema.json",
-  "manifestVersion": "2.2.0",
+  "manifestVersion": "2.3.0",
   "researchDate": "2026-09-10",
   "staleAfterDays": 45,
   "note": "Single source of truth for every Apple symbol this skill names. `status` is the ONLY authority on whether a symbol is real. Prose references must not assert existence of a symbol that is not listed here. CI re-resolves every `docUrl` and flags drift.",
@@ -947,6 +947,37 @@
       "docUrl": "https://developer.apple.com/documentation/avfoundation/avcapturedevice/position-swift.enum/front",
       "usedIn": [
         "05-camera.md"
+      ]
+    },
+    {
+      "id": "swiftui.navigationStack",
+      "name": "NavigationStack",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 16.0",
+      "duoExclusive": false,
+      "note": "The push/pop navigation container. Its bar participates in the vertical bar region; a hand-rolled bar does not.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/navigationstack",
+      "usedIn": [
+        "01-design-and-layout.md",
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
+      ]
+    },
+    {
+      "id": "swiftui.toolbarItem",
+      "name": "ToolbarItem",
+      "framework": "SwiftUI",
+      "kind": "struct",
+      "status": "verified",
+      "availability": "iOS 14.0",
+      "duoExclusive": false,
+      "note": "The unit of toolbar content. On Duo it is the thing that carries axisBehavior and visibilityPriority, and the reason every action should be expressible as one.",
+      "docUrl": "https://developer.apple.com/documentation/swiftui/toolbaritem",
+      "usedIn": [
+        "02-bars-and-navigation.md",
+        "07-api-cookbook.md"
       ]
     }
   ],

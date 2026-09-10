@@ -190,10 +190,13 @@ for f in markdown:
                 continue
             if not (f.parent / target).exists():
                 broken.append(f"{f.relative_to(root)} -> {target}")
-    for target in ref_literal.findall(text):
-        name = pathlib.Path(target).name
-        if not (refs_dir / name).exists():
-            broken.append(f"{f.relative_to(root)} -> stale reference literal {target}")
+    # CHANGELOG.md is a historical record: it must be able to name a retired
+    # filename in order to document the rename that retired it.
+    if f.name != "CHANGELOG.md":
+        for target in ref_literal.findall(text):
+            name = pathlib.Path(target).name
+            if not (refs_dir / name).exists():
+                broken.append(f"{f.relative_to(root)} -> stale reference literal {target}")
 if broken:
     print("broken/stale references:")
     for item in sorted(set(broken)):

@@ -14,6 +14,14 @@
 
 <br>
 
+<div align="center">
+<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/tile/Apple-iPhone-Duo-opening-iPhone-Duo-260909-lp.jpg.landing-big_2x.jpg" alt="iPhone Duo being opened, revealing the 7.6-inch inner display" width="84%">
+<br>
+<sub>iPhone Duo · 7.6&Prime; inner display, 5.4&Prime; outer · images &copy; Apple Inc., served from apple.com &mdash; <a href="NOTICE.md">not redistributed here</a></sub>
+</div>
+
+<br>
+
 ## Why this exists
 
 iPhone Duo introduces two displays, continuously changing window sizes, reserved regions,
@@ -42,6 +50,21 @@ creates product value that ordinary adaptive layout cannot express.
 <div align="center">
 <img src="assets/poses.svg" alt="The five iPhone Duo poses and the layout pressures they create" width="100%">
 </div>
+
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top" align="center">
+<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-display-sizes-260909_big.jpg.large_2x.jpg" alt="The inner and outer iPhone Duo displays side by side" width="100%">
+<br><sub><b>Two displays, one app.</b> Compact width outside, regular width inside.<br>Your layout is the thing that has to travel between them.</sub>
+</td>
+<td width="50%" valign="top" align="center">
+<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-multitasking-Safari-and-Siri-app-260909_big.jpg.large_2x.jpg" alt="Two apps sharing the inner display in Split View" width="100%">
+<br><sub><b>Split View on the inner display.</b> Each app puts its controls<br>on its <i>outer</i> edge &mdash; so "your" side is not always the left.</sub>
+</td>
+</tr>
+</table>
 
 <br>
 
@@ -81,6 +104,20 @@ Review this screen for partially-open iPhone Duo use.
 Check fold interference, reachability, state continuity, and whether anything genuinely
 needs hinge input rather than ordinary responsive layout.
 ```
+
+<div align="center">
+<table>
+<tr>
+<td width="25%" align="center"><img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-Slack-app-260909_big.jpg.large_2x.jpg" alt="Slack on iPhone Duo" width="100%"><br><sub>Slack</sub></td>
+<td width="25%" align="center"><img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-Zoom-app-260909_big.jpg.large_2x.jpg" alt="Zoom on iPhone Duo" width="100%"><br><sub>Zoom</sub></td>
+<td width="25%" align="center"><img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-Netflix-app-260909_big.jpg.large_2x.jpg" alt="Netflix on iPhone Duo" width="100%"><br><sub>Netflix</sub></td>
+<td width="25%" align="center"><img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-Detail-app-260909_big.jpg.large_2x.jpg" alt="Detail on iPhone Duo" width="100%"><br><sub>Detail</sub></td>
+</tr>
+</table>
+<sub>Shipping apps on the inner display. None of them is a separate &ldquo;Duo version.&rdquo;</sub>
+</div>
+
+<br>
 
 ## The execution model
 
@@ -149,6 +186,12 @@ partially open, the system may move the surfaces apart. The agent must choose pr
 secondary intentionally rather than inferring those roles from names like “player” or “queue.”
 
 ## Scenes, hinge, and camera
+
+<div align="center">
+<img src="https://www.apple.com/newsroom/images/2026/09/apple-unveils-iphone-duo/article/Apple-iPhone-Duo-Center-Stage-front-camera-260909_big.jpg.large_2x.jpg" alt="The Center Stage front camera on the outer display of iPhone Duo" width="62%">
+<br><sub>Two front cameras &mdash; and <b>both report</b> <code>.front</code>. On a device whose displays can face<br>opposite directions, that is no longer enough to know a camera is looking at you.</sub>
+</div>
+
 
 Tier 3 guidance covers:
 
@@ -231,6 +274,23 @@ skills/iphone-duo/
 ```
 
 ## Source hierarchy
+
+<div align="center">
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111466/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11309/11309_wide_250x141_2x.jpg" alt="Apple Tech Talk: Design for iPhone Duo" width="100%"><br><sub><b>Design for iPhone Duo</b></sub></a></td>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111461/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11312/11312_wide_250x141_2x.jpg" alt="Apple Tech Talk: Prepare your app" width="100%"><br><sub><b>Prepare your app</b></sub></a></td>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111462/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11313/11313_wide_250x141_2x.jpg" alt="Apple Tech Talk: Raise the bar" width="100%"><br><sub><b>Raise the bar</b></sub></a></td>
+</tr>
+<tr>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111463/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11314/11314_wide_250x141_2x.jpg" alt="Apple Tech Talk: Strike a pose" width="100%"><br><sub><b>Strike a pose</b></sub></a></td>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111464/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11315/11315_wide_250x141_2x.jpg" alt="Apple Tech Talk: Displays and scenes" width="100%"><br><sub><b>Displays and scenes</b></sub></a></td>
+<td width="33%" align="center"><a href="https://developer.apple.com/videos/play/tech-talks/111465/"><img src="https://devimages-cdn.apple.com/wwdc-services/images/8/11316/11316_wide_250x141_2x.jpg" alt="Apple Tech Talk: Camera experience" width="100%"><br><sub><b>Camera experience</b></sub></a></td>
+</tr>
+</table>
+<sub>The six launch Tech Talks this skill is built from. Click through to Apple.</sub>
+</div>
+
 
 When sources disagree, the skill uses this order:
 
