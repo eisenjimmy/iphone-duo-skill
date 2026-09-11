@@ -317,5 +317,3 @@ Corrections are more valuable than additional prose while the iOS 27.1 API surfa
 settling. See [CONTRIBUTING.md](CONTRIBUTING.md) for the evidence and verification contract.
 
 [MIT](LICENSE) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Trademark/image notice](NOTICE.md)
-
-Prior art: [FloWritesCode/fwc-swiftui-skills](https://github.com/FloWritesCode/fwc-swiftui-skills)
